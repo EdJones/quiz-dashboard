@@ -7,10 +7,34 @@
                 <button class="button-75" @click="loadUserProgress">Load User Progress</button>
                 <div v-if="userProgressList.length" class="progress-list">
                     <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
-                        <h4>User: {{ progress.userId }}</h4>
-                        <p>Quiz: {{ progress.quizId }}</p>
-                        <p>Last Updated: {{ formatDate(progress.lastUpdated) }}</p>
-                        <pre>{{ JSON.stringify(progress, null, 2) }}</pre>
+                        <div class="progress-header">
+                            <h4>Quiz Attempt Details</h4>
+                            <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span>
+                        </div>
+                        <div class="progress-details">
+                            <div class="detail-row">
+                                <strong>User ID:</strong> {{ progress.userId }}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Quiz ID:</strong> {{ progress.quizId }}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Answers:</strong>
+                                <ul class="answers-list">
+                                    <li v-for="(answer, index) in progress.userAnswers" :key="index">
+                                        Q{{ index + 1 }}: {{ answer }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="detail-row" v-if="progress.incorrectQuestions?.length">
+                                <strong>Incorrect Questions:</strong>
+                                <ul class="incorrect-list">
+                                    <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
+                                        {{ q }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div v-else-if="error" class="error">
@@ -81,20 +105,89 @@ export default {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .progress-item {
     margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.progress-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.timestamp {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.progress-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-row strong {
+    color: #555;
+    min-width: 120px;
+}
+
+.answers-list,
+.incorrect-list {
+    list-style: none;
+    padding-left: 20px;
+    margin: 5px 0;
+}
+
+.answers-list li,
+.incorrect-list li {
+    margin: 3px 0;
+    padding: 3px 0;
 }
 
 .error {
-    color: red;
+    color: #dc3545;
     padding: 10px;
     margin: 10px 0;
-    border: 1px solid red;
+    border: 1px solid #dc3545;
     border-radius: 4px;
+    background-color: #fff;
+}
+
+.button-75 {
+    margin: 10px 0;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button-75:hover {
+    background-color: #0056b3;
 }
 </style>
