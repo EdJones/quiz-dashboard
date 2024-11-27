@@ -19,8 +19,13 @@
                                 <strong>Quiz ID:</strong> {{ progress.quizId }}
                             </div>
                             <div class="detail-row">
-                                <strong>Answers:</strong>
-                                <ul class="answers-list">
+                                <div class="answers-header" @click="toggleAnswers(progress.id)">
+                                    <strong>Answers</strong>
+                                    <button class="toggle-btn">
+                                        {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
+                                    </button>
+                                </div>
+                                <ul class="answers-list" v-if="showAnswersMap[progress.id]">
                                     <li v-for="(answer, index) in progress.userAnswers" :key="index">
                                         Q{{ index + 1 }}: {{ answer }}
                                     </li>
@@ -57,7 +62,8 @@ export default {
         return {
             userProgressList: [],
             error: null,
-            db: getFirestore()
+            db: getFirestore(),
+            showAnswersMap: {}
         }
     },
     computed: {
@@ -94,6 +100,10 @@ export default {
             if (!timestamp) return 'No date';
             const date = timestamp.toDate();
             return date.toLocaleString();
+        },
+        toggleAnswers(progressId) {
+            this.showAnswersMap[progressId] = !this.showAnswersMap[progressId];
+            this.showAnswersMap = { ...this.showAnswersMap };
         }
     }
 }
@@ -189,5 +199,37 @@ export default {
 
 .button-75:hover {
     background-color: #0056b3;
+}
+
+.answers-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.answers-header:hover {
+    background-color: #f0f0f0;
+}
+
+.toggle-btn {
+    padding: 4px 8px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    background-color: #dee2e6;
+}
+
+.answers-list {
+    margin-top: 8px;
+    padding-left: 20px;
+    border-left: 2px solid #e9ecef;
 }
 </style>
