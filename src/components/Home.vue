@@ -13,14 +13,20 @@
                         </div>
                         <div class="progress-details">
                             <div class="detail-row">
-                                <strong>User ID:</strong> {{ progress.userId }}
+                                <strong>User ID:</strong>
+                                {{ getUserDisplayName(progress.userId) }}
                             </div>
                             <div class="detail-row">
                                 <strong>Quiz ID:</strong> {{ progress.quizId }}
                             </div>
                             <div class="detail-row">
                                 <div class="answers-header" @click="toggleAnswers(progress.id)">
-                                    <strong>Answers</strong>
+                                    <div class="header-info">
+                                        <strong>Answers</strong>
+                                        <span class="question-count" v-if="progress.userAnswers?.length">
+                                            (Question {{ progress.userAnswers.length }})
+                                        </span>
+                                    </div>
                                     <button class="toggle-btn">
                                         {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
                                     </button>
@@ -63,7 +69,11 @@ export default {
             userProgressList: [],
             error: null,
             db: getFirestore(),
-            showAnswersMap: {}
+            showAnswersMap: {},
+            userDisplayNames: {
+                'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
+                'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone'
+            }
         }
     },
     computed: {
@@ -104,6 +114,9 @@ export default {
         toggleAnswers(progressId) {
             this.showAnswersMap[progressId] = !this.showAnswersMap[progressId];
             this.showAnswersMap = { ...this.showAnswersMap };
+        },
+        getUserDisplayName(userId) {
+            return this.userDisplayNames[userId] || userId;
         }
     }
 }
@@ -231,5 +244,17 @@ export default {
     margin-top: 8px;
     padding-left: 20px;
     border-left: 2px solid #e9ecef;
+}
+
+.answers-header .header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 0.9em;
+    font-weight: normal;
 }
 </style>
