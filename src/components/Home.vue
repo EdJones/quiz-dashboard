@@ -13,11 +13,23 @@
                         </div>
                         <div class="progress-details">
                             <div class="detail-row">
-                                <strong>User ID:</strong>
-                                {{ getUserDisplayName(progress.userId) }}
+                                <div class="id-info">
+                                    <div>
+                                        <strong>User ID:</strong>
+                                        {{ getUserDisplayName(progress.userId) }}
+                                    </div>
+                                    <div>
+                                        <strong>Quiz ID:</strong> {{ progress.quizId }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="detail-row">
-                                <strong>Quiz ID:</strong> {{ progress.quizId }}
+                            <div class="detail-row" v-if="progress.incorrectQuestions?.length">
+                                <strong>Incorrect Questions:</strong>
+                                <ul class="incorrect-list">
+                                    <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
+                                        {{ formatIncorrectQuestion(q) }}
+                                    </li>
+                                </ul>
                             </div>
                             <div class="detail-row">
                                 <div class="answers-header" @click="toggleAnswers(progress.id)">
@@ -34,14 +46,6 @@
                                 <ul class="answers-list" v-if="showAnswersMap[progress.id]">
                                     <li v-for="(answer, index) in progress.userAnswers" :key="index">
                                         Q{{ index + 1 }}: {{ answer }}
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="detail-row" v-if="progress.incorrectQuestions?.length">
-                                <strong>Incorrect Questions:</strong>
-                                <ul class="incorrect-list">
-                                    <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                        {{ q }}
                                     </li>
                                 </ul>
                             </div>
@@ -117,6 +121,14 @@ export default {
         },
         getUserDisplayName(userId) {
             return this.userDisplayNames[userId] || userId;
+        },
+        formatIncorrectQuestion(question) {
+            try {
+                const q = typeof question === 'string' ? JSON.parse(question) : question;
+                return `Q${q.id}: ${q.title} (Answered: ${q.chosenAnswer})`;
+            } catch (e) {
+                return question; // Fallback to original format if parsing fails
+            }
         }
     }
 }
@@ -175,7 +187,8 @@ export default {
 
 .detail-row strong {
     color: #555;
-    min-width: 120px;
+    display: block;
+    margin-bottom: 8px;
 }
 
 .answers-list,
@@ -256,5 +269,34 @@ export default {
     color: #666;
     font-size: 0.9em;
     font-weight: normal;
+}
+
+.id-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.id-info>div {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.incorrect-list {
+    list-style: none;
+    padding-left: 20px;
+    margin: 5px 0;
+    border-left: 2px solid #e9ecef;
+}
+
+.incorrect-list li {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    line-height: 1.4;
 }
 </style>
