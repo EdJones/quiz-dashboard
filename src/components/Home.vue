@@ -20,7 +20,14 @@
                                     </div>
                                     <div>
                                         <strong>Quiz ID:</strong> {{ progress.quizId }}
+                                        <span v-if="progress.userAnswers?.length" class="quiz-stats">
+                                            ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
+                                            of {{ progress.userAnswers.length }} correct)
+                                        </span>
                                     </div>
+                                </div>
+                                <div class="quiz-title">
+                                    {{ getQuizTitle(progress.quizId) }}
                                 </div>
                             </div>
                             <div class="detail-row" v-if="progress.incorrectQuestions?.length">
@@ -65,6 +72,7 @@
 
 <script>
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
+import { quizSets } from '../data/quizSets.js';
 
 export default {
     name: 'Home',
@@ -77,7 +85,8 @@ export default {
             userDisplayNames: {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone'
-            }
+            },
+            quizSets: quizSets
         }
     },
     computed: {
@@ -129,6 +138,16 @@ export default {
             } catch (e) {
                 return question; // Fallback to original format if parsing fails
             }
+        },
+        getQuizTitle(quizId) {
+            const quiz = this.quizSets.find(set =>
+                set.quizItems.some(item => item.id === parseInt(quizId))
+            );
+            if (quiz) {
+                const quizItem = quiz.quizItems.find(item => item.id === parseInt(quizId));
+                return quizItem?.title || `Quiz ${quizId}`;
+            }
+            return `Quiz ${quizId}`;
         }
     }
 }
@@ -138,20 +157,23 @@ export default {
 .progress-list {
     margin: 20px;
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color, #ccc);
     border-radius: 8px;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    background-color: var(--bg-color, #fff);
+    color: var(--text-color, #333);
 }
 
 .progress-item {
     margin-bottom: 20px;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color, #ddd);
     border-radius: 8px;
-    background-color: #f9f9f9;
+    background-color: var(--item-bg-color, #f9f9f9);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--text-color, #333);
 }
 
 .progress-header {
@@ -165,11 +187,11 @@ export default {
 
 .progress-header h4 {
     margin: 0;
-    color: #333;
+    color: var(--text-color, #333);
 }
 
 .timestamp {
-    color: #666;
+    color: var(--muted-color, #666);
     font-size: 0.9em;
 }
 
@@ -186,7 +208,7 @@ export default {
 }
 
 .detail-row strong {
-    color: #555;
+    color: var(--text-color, #555);
     display: block;
     margin-bottom: 8px;
 }
@@ -242,15 +264,16 @@ export default {
 
 .toggle-btn {
     padding: 4px 8px;
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
+    background-color: var(--btn-bg-color, #e9ecef);
+    border: 1px solid var(--border-color, #ced4da);
     border-radius: 4px;
     font-size: 0.9em;
     cursor: pointer;
+    color: var(--text-color, #333);
 }
 
 .toggle-btn:hover {
-    background-color: #dee2e6;
+    background-color: var(--btn-hover-bg-color, #dee2e6);
 }
 
 .answers-list {
@@ -266,7 +289,7 @@ export default {
 }
 
 .question-count {
-    color: #666;
+    color: var(--muted-color, #666);
     font-size: 0.9em;
     font-weight: normal;
 }
@@ -293,10 +316,36 @@ export default {
 .incorrect-list li {
     margin: 8px 0;
     padding: 8px 12px;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
+    background-color: var(--item-bg-color, #fff);
+    border: 1px solid var(--border-color, #e9ecef);
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     line-height: 1.4;
+    color: var(--text-color, #333);
+}
+
+.quiz-stats {
+    color: var(--muted-color, #666);
+    font-size: 0.9em;
+    margin-left: 8px;
+}
+
+.quiz-title {
+    margin-top: 8px;
+    font-weight: 500;
+    color: var(--text-color, #333);
+}
+
+/* Add dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --item-bg-color: #2d2d2d;
+        --text-color: #e0e0e0;
+        --muted-color: #a0a0a0;
+        --border-color: #333;
+        --btn-bg-color: #333;
+        --btn-hover-bg-color: #555;
+    }
 }
 </style>
