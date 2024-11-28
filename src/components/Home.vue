@@ -25,9 +25,9 @@
                                             of {{ progress.userAnswers.length }} correct)
                                         </span>
                                     </div>
-                                </div>
-                                <div class="quiz-title">
-                                    {{ getQuizTitle(progress.quizId) }}
+                                    <div class="quiz-title">
+                                        {{ getQuizTitle(progress.quizId) }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="detail-row" v-if="progress.incorrectQuestions?.length">
@@ -85,8 +85,7 @@ export default {
             userDisplayNames: {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone'
-            },
-            quizSets: quizSets
+            }
         }
     },
     computed: {
@@ -140,12 +139,11 @@ export default {
             }
         },
         getQuizTitle(quizId) {
-            const quiz = this.quizSets.find(set =>
-                set.quizItems.some(item => item.id === parseInt(quizId))
+            const quiz = quizSets.find(set =>
+                set.items.includes(parseInt(quizId))
             );
             if (quiz) {
-                const quizItem = quiz.quizItems.find(item => item.id === parseInt(quizId));
-                return quizItem?.title || `Quiz ${quizId}`;
+                return quiz.setName;
             }
             return `Quiz ${quizId}`;
         }
@@ -297,13 +295,13 @@ export default {
 .id-info {
     display: flex;
     gap: 20px;
-    align-items: center;
+    align-items: baseline;
 }
 
 .id-info>div {
     display: flex;
     gap: 8px;
-    align-items: center;
+    align-items: baseline;
 }
 
 .incorrect-list {
