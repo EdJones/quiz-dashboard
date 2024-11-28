@@ -84,7 +84,8 @@ export default {
             showAnswersMap: {},
             userDisplayNames: {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
-                'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone'
+                'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
+                '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
             }
         }
     },
