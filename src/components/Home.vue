@@ -1,8 +1,17 @@
 <template>
     <div>
-        <h1>Admin Dashboard</h1>
+        <h2>Quizzes Dashboard</h2>
+        <div class="tab-container">
+            <button class="tab-button" :class="{ active: activeTab === 'progress' }" @click="activeTab = 'progress'">
+                User Progress
+            </button>
+            <button class="tab-button" :class="{ active: activeTab === 'entries' }" @click="activeTab = 'entries'">
+                Quiz Entries
+            </button>
+        </div>
         <div class="admin-dashboard">
-            <div class="user-progress">
+            <!-- User Progress Tab -->
+            <div v-if="activeTab === 'progress'" class="user-progress">
                 <h3>User Progress</h3>
                 <button class="button-75" @click="loadUserProgress">Load User Progress</button>
                 <div v-if="userProgressList.length" class="progress-list">
@@ -66,6 +75,56 @@
                     No user progress found
                 </div>
             </div>
+
+            <!-- Quiz Entries Tab -->
+            <div v-if="activeTab === 'entries'" class="quiz-entries">
+                <h3>Quiz Entries</h3>
+                <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
+                <div v-if="quizEntriesList.length" class="entries-list">
+                    <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
+                        <div class="entry-header">
+                            <h4>Quiz Entry Details</h4>
+                            <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+                        </div>
+                        <div class="entry-details">
+                            <div class="detail-row">
+                                <strong>Quiz ID:</strong> {{ entry.quizId }}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Question:</strong> {{ getQuestionText(entry) }}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Title:</strong> {{ entry.title }}
+                            </div>
+                            <div class="detail-row" v-if="entry.subtitle">
+                                <strong>Subtitle:</strong> {{ entry.subtitle }}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Options:</strong>
+                                <ul v-if="hasOptions(entry)">
+                                    <li v-if="entry.option1">1. {{ entry.option1 }}</li>
+                                    <li v-if="entry.option2">2. {{ entry.option2 }}</li>
+                                    <li v-if="entry.option3">3. {{ entry.option3 }}</li>
+                                    <li v-if="entry.option4">4. {{ entry.option4 }}</li>
+                                    <li v-if="entry.option5">5. {{ entry.option5 }}</li>
+                                </ul>
+                            </div>
+                            <div class="detail-row">
+                                <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
+                            </div>
+                            <div class="detail-row" v-if="entry.timestamp">
+                                <strong>Timestamp:</strong> {{ formatDate(entry.timestamp) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="entriesError" class="error">
+                    {{ entriesError }}
+                </div>
+                <div v-else>
+                    No quiz entries found
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -86,7 +145,10 @@ export default {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
                 '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
-            }
+            },
+            activeTab: 'progress',
+            quizEntriesList: [],
+            entriesError: null
         }
     },
     computed: {
@@ -94,6 +156,13 @@ export default {
             return [...this.userProgressList].sort((a, b) => {
                 const dateA = a.lastUpdated?.toDate() || new Date(0);
                 const dateB = b.lastUpdated?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+        },
+        sortedEntries() {
+            return [...this.quizEntriesList].sort((a, b) => {
+                const dateA = a.timestamp?.toDate() || new Date(0);
+                const dateB = b.timestamp?.toDate() || new Date(0);
                 return dateB - dateA;
             });
         }
@@ -147,6 +216,36 @@ export default {
                 return quiz.setName;
             }
             return `Quiz ${quizId}`;
+        },
+        async loadQuizEntries() {
+            try {
+                console.log('Loading quiz entries...');
+                const entriesRef = collection(this.db, 'quizEntries');
+                const querySnapshot = await getDocs(entriesRef);
+
+                console.log('Found', querySnapshot.docs.length, 'quiz entries');
+                this.quizEntriesList = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    console.log('Entry ID:', doc.id);
+                    console.log('Question field:', data.question);
+                    console.log('Question type:', typeof data.question);
+                    console.log('All fields:', Object.keys(data));
+                    return {
+                        id: doc.id,
+                        ...data
+                    };
+                });
+            } catch (error) {
+                console.error('Error loading quiz entries:', error);
+                this.entriesError = error.message;
+            }
+        },
+        getQuestionText(entry) {
+            // Check all possible question field variations
+            return entry.question || entry.Question || entry.questionP2 || entry.title || 'No question text found';
+        },
+        hasOptions(entry) {
+            return entry.option1 || entry.option2 || entry.option3 || entry.option4 || entry.option5;
         }
     }
 }
@@ -333,6 +432,68 @@ export default {
     margin-top: 8px;
     font-weight: 500;
     color: var(--text-color, #333);
+}
+
+.tab-container {
+    display: flex;
+    gap: 10px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: 1px solid var(--border-color, #ccc);
+    border-radius: 4px;
+    background-color: var(--bg-color, #fff);
+    color: var(--text-color, #333);
+    cursor: pointer;
+    flex: 1;
+    max-width: 200px;
+}
+
+.tab-button.active {
+    background-color: var(--btn-bg-color, #007bff);
+    color: white;
+    border-color: var(--btn-bg-color, #007bff);
+}
+
+.tab-button:hover {
+    background-color: var(--btn-hover-bg-color, #0056b3);
+    color: white;
+}
+
+.entries-list {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid var(--border-color, #ccc);
+    border-radius: 8px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.entry-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    background-color: var(--item-bg-color, #f9f9f9);
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.entry-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* Add dark mode support */
