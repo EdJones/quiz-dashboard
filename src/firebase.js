@@ -1,7 +1,7 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getAuth, setPersistence, browserLocalPersistence, signInAnonymously } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence, signInAnonymously, GoogleAuthProvider, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,6 +25,10 @@ setPersistence(auth, browserLocalPersistence)
     .catch((error) => {
         console.error('Error enabling persistence:', error);
     });
+
+// Initialize providers
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
 // Auth helper functions
 export const signInAnonymouslyWithPersistence = async () => {
@@ -60,4 +64,28 @@ export const saveUserProgress = async (quizId, progress) => {
         throw error;
     }
 };
+
+// Add OAuth sign in functions
+export const signInWithGoogle = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        console.log('Google sign in successful:', result.user.uid);
+        return result.user;
+    } catch (error) {
+        console.error('Error in Google sign in:', error);
+        throw error;
+    }
+};
+
+export const signInWithGithub = async () => {
+    try {
+        const result = await signInWithPopup(auth, githubProvider);
+        console.log('Github sign in successful:', result.user.uid);
+        return result.user;
+    } catch (error) {
+        console.error('Error in Github sign in:', error);
+        throw error;
+    }
+};
+
 export { db, auth };
