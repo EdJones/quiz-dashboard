@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
+import { getQuizAttempts, getUserProgress } from '../firebase';
 import { quizSets } from '../data/quizSets.js';
 import { auth } from '../firebase';
 
@@ -81,7 +81,6 @@ export default {
         return {
             userProgressList: [],
             error: null,
-            db: getFirestore(),
             showAnswersMap: {},
             userDisplayNames: {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
@@ -105,34 +104,22 @@ export default {
     methods: {
         async loadUserProgress() {
             try {
-                console.log('Loading user progress...', auth.currentUser?.uid);
-                const progressRef = collection(this.db, 'quizAttempts');
-                const q = query(progressRef, orderBy('lastUpdated', 'desc'));
+                console.log('Loading all user data...');
 
-                // Verify auth state before query
-                if (!auth.currentUser) {
-                    console.warn('No authenticated user when trying to load progress');
-                    this.error = 'Please sign in to view progress';
-                    return;
-                }
+                // Get all quiz attempts
+                const attempts = await getQuizAttempts();
+                console.log('Quiz attempts loaded:', attempts.length);
 
-                const querySnapshot = await getDocs(q);
-                console.log('Query completed, documents:', querySnapshot.size);
+                // Get all user progress
+                const progress = await getUserProgress();
+                console.log('User progress loaded:', progress.length);
 
-                this.userProgressList = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                // Combine or handle the data as needed
+                this.userProgressList = [...attempts, ...progress];
 
-                console.log('Progress loaded:', this.userProgressList.length, 'records');
             } catch (error) {
-                console.error('Error loading user progress:', error);
-                // More detailed error information
-                this.error = `Error loading progress: ${error.code || error.message}`;
-
-                if (error.code === 'permission-denied') {
-                    console.error('Security rules preventing access');
-                }
+                console.error('Error loading data:', error);
+                this.error = error.message;
             }
         },
         formatDate(timestamp) {

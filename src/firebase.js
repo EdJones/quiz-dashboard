@@ -1,6 +1,6 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, setDoc, serverTimestamp, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFirestore, collection, doc, setDoc, serverTimestamp, enableIndexedDbPersistence, query, orderBy, getDocs, where } from "firebase/firestore";
 import { getAuth, setPersistence, browserLocalPersistence, signInAnonymously, GoogleAuthProvider, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -72,6 +72,38 @@ export const saveUserProgress = async (quizId, progress) => {
         console.log('Progress saved:', progressRef.id);
     } catch (error) {
         console.error('Error saving progress:', error);
+        throw error;
+    }
+};
+
+// Function to get quiz attempts
+export const getQuizAttempts = async () => {
+    try {
+        const attemptsRef = collection(db, 'quizAttempts');
+        const q = query(attemptsRef, orderBy('lastUpdated', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error getting quiz attempts:', error);
+        throw error;
+    }
+};
+
+// Function to get all user progress (admin view)
+export const getUserProgress = async () => {
+    try {
+        const progressRef = collection(db, 'userProgress');
+        const q = query(progressRef, orderBy('lastUpdated', 'desc')); // Order by timestamp
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error getting user progress:', error);
         throw error;
     }
 };
