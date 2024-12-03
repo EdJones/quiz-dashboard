@@ -14,26 +14,27 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Enable Firestore persistence
-enableIndexedDbPersistence(db)
-    .catch((err) => {
-        if (err.code == 'failed-precondition') {
-            console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-        } else if (err.code == 'unimplemented') {
-            console.warn('The current browser doesn\'t support persistence.');
-        }
-    });
-
-// Enable Auth persistence
+// Wait for auth before enabling persistence
 setPersistence(auth, browserLocalPersistence)
     .then(() => {
-        console.log('Firebase persistence enabled');
+        console.log('Auth persistence enabled');
+        // Enable Firestore persistence after auth is set up
+        return enableIndexedDbPersistence(db);
+    })
+    .then(() => {
+        console.log('Firestore persistence enabled');
     })
     .catch((error) => {
-        console.error('Error enabling persistence:', error);
+        if (error.code === 'failed-precondition') {
+            console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+        } else if (error.code === 'unimplemented') {
+            console.warn('The current browser doesn\'t support persistence.');
+        } else {
+            console.error('Error enabling persistence:', error);
+        }
     });
 
 // Initialize providers

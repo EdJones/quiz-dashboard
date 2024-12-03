@@ -73,6 +73,7 @@
 <script>
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
 import { quizSets } from '../data/quizSets.js';
+import { auth } from '../firebase';
 
 export default {
     name: 'Home',
@@ -104,19 +105,34 @@ export default {
     methods: {
         async loadUserProgress() {
             try {
-                console.log('Loading user progress...');
+                console.log('Loading user progress...', auth.currentUser?.uid);
                 const progressRef = collection(this.db, 'quizAttempts');
                 const q = query(progressRef, orderBy('lastUpdated', 'desc'));
-                const querySnapshot = await getDocs(q);
 
-                console.log('Found', querySnapshot.docs.length, 'progress records');
+                // Verify auth state before query
+                if (!auth.currentUser) {
+                    console.warn('No authenticated user when trying to load progress');
+                    this.error = 'Please sign in to view progress';
+                    return;
+                }
+
+                const querySnapshot = await getDocs(q);
+                console.log('Query completed, documents:', querySnapshot.size);
+
                 this.userProgressList = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                console.log('Progress loaded:', this.userProgressList.length, 'records');
             } catch (error) {
                 console.error('Error loading user progress:', error);
-                this.error = error.message;
+                // More detailed error information
+                this.error = `Error loading progress: ${error.code || error.message}`;
+
+                if (error.code === 'permission-denied') {
+                    console.error('Security rules preventing access');
+                }
             }
         },
         formatDate(timestamp) {
