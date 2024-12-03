@@ -24,7 +24,7 @@ import LiteYouTubeEmbed from 'vue-lite-youtube-embed';
 import 'vue-lite-youtube-embed/style.css'
 
 import { auth, signInAnonymouslyWithPersistence, signInWithGoogle, signInWithGithub } from './firebase';
-
+import { getAnalytics } from "firebase/analytics";
 inject();
 
 library.add(faUserSecret)
@@ -50,6 +50,8 @@ import { createRouter, createWebHistory } from 'vue-router'; // Import the route
 import NewItem from './components/NewItem.vue'; // Import the new component
 import Login from './components/Login.vue';
 
+// Initialize Firebase Analytics after the app is created
+const analytics = getAnalytics();
 // Define your routes
 const routes = [
     { path: '/', component: App }, // Main application route
@@ -122,6 +124,7 @@ export const useAuthStore = defineStore('auth', {
 
 // Initialize auth store and sign in anonymously
 const authStore = useAuthStore(pinia);
+authStore.initializeAuthListener();
 authStore.signInAnonymously().catch(console.error);
 
 // Add navigation guard
