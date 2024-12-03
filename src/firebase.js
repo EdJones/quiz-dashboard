@@ -1,6 +1,6 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, doc, setDoc, serverTimestamp, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth, setPersistence, browserLocalPersistence, signInAnonymously, GoogleAuthProvider, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -17,7 +17,17 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Enable persistence
+// Enable Firestore persistence
+enableIndexedDbPersistence(db)
+    .catch((err) => {
+        if (err.code == 'failed-precondition') {
+            console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+        } else if (err.code == 'unimplemented') {
+            console.warn('The current browser doesn\'t support persistence.');
+        }
+    });
+
+// Enable Auth persistence
 setPersistence(auth, browserLocalPersistence)
     .then(() => {
         console.log('Firebase persistence enabled');
