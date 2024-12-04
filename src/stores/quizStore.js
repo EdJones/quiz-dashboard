@@ -1,6 +1,6 @@
 // src/stores/quizStore.js
 import { defineStore } from 'pinia';
-import { auth, db } from '../firebase'; // Adjust the path as necessary
+import { auth, sorQuizzesDb as db } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 export const quizStore = defineStore('quiz', {
@@ -62,6 +62,7 @@ export const quizStore = defineStore('quiz', {
     actions: {
         async recordQuizAttempt(quizStarted) {
             const userId = auth.currentUser?.uid;
+            console.log('Recording quiz attempt to SORQuizzes DB...');
 
             const attempt = {
                 userId,  // Add user ID
@@ -86,6 +87,8 @@ export const quizStore = defineStore('quiz', {
                 console.error("No user answers to save.");
                 return; // Exit if there are no answers to save
             }
+
+            console.log('Saving user answers to SORQuizzes DB...');
 
             const attempt = {
                 userAnswers: this.userAnswers,  // Changed from userAnswers to this.userAnswers
@@ -116,6 +119,7 @@ export const quizStore = defineStore('quiz', {
         },
         async saveDraftQuizEntry() {
             try {
+                console.log('Saving quiz entry to SORQuizzes DB...');
                 // Add validation/initialization
                 const entryToSave = {
                     ...this.draftQuizEntry,
@@ -136,7 +140,7 @@ export const quizStore = defineStore('quiz', {
                     timestamp: new Date(),
                 };
 
-                console.log('Saving entry with podcast data:', entryToSave, 'at timestamp:', entryToSave.timestamp);
+                console.log('Saving entry with podcast data:', entryToSave);
                 const docRef = await addDoc(collection(db, 'quizEntries'), entryToSave);
                 console.log('Document written with ID: ', docRef.id);
                 this.saveStatus = {
@@ -217,7 +221,7 @@ export const quizStore = defineStore('quiz', {
                     return;
                 }
 
-                // Clean data before saving to Firebase
+                console.log('Saving user answer to SORQuizzes DB...');
                 const cleanUserAnswers = this.userAnswers.filter(answer =>
                     answer !== null && answer !== undefined
                 );

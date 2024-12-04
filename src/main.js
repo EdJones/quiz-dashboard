@@ -14,6 +14,8 @@ import { faFlaskVial } from '@fortawesome/free-solid-svg-icons'
 import { faPodcast } from '@fortawesome/free-solid-svg-icons'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 import { faBook } from '@fortawesome/free-solid-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 
 import { inject } from '@vercel/analytics';
 
@@ -23,8 +25,8 @@ import Vue3Lottie from 'vue3-lottie'
 import LiteYouTubeEmbed from 'vue-lite-youtube-embed';
 import 'vue-lite-youtube-embed/style.css'
 
-import { auth, signInAnonymouslyWithPersistence, signInWithGoogle, signInWithGithub } from './firebase';
-import { getAnalytics } from "firebase/analytics";
+import { auth, signInAnonymouslyWithPersistence, signInWithGoogle, signInWithGithub, analytics } from './firebase';
+
 inject();
 
 library.add(faUserSecret)
@@ -37,6 +39,8 @@ library.add(faFlaskVial)
 library.add(faPodcast)
 library.add(faExternalLinkAlt)
 library.add(faBook)
+library.add(faGoogle)
+library.add(faGithub)
 const app = createApp(App)
 const pinia = createPinia(); // Create a Pinia store instance
 
@@ -50,8 +54,6 @@ import { createRouter, createWebHistory } from 'vue-router'; // Import the route
 import NewItem from './components/NewItem.vue'; // Import the new component
 import Login from './components/Login.vue';
 
-// Initialize Firebase Analytics after the app is created
-const analytics = getAnalytics();
 // Define your routes
 const routes = [
     { path: '/', component: App }, // Main application route
