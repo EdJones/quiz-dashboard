@@ -3,15 +3,7 @@
         <h1>Admin Dashboard</h1>
 
         <!-- Test buttons -->
-        <div class="test-controls">
-            <button @click="testDatabases" class="button-75">Test Database Connections</button>
-            <div v-if="testResults" class="test-results">
-                <pre>{{ testResults }}</pre>
-            </div>
-        </div>
-
-        <!-- Test buttons -->
-        <div class="test-controls">
+        <div v-if="debug" class="test-controls">
             <button @click="testDatabases" class="button-75">Test Database Connections</button>
             <div v-if="testResults" class="test-results">
                 <pre>{{ testResults }}</pre>
@@ -121,6 +113,7 @@ export default {
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
                 '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
             },
+            debug: false,
             testResults: null
         }
     },
