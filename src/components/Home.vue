@@ -226,6 +226,16 @@ export default {
                 this.testResults += `❌ Error: ${error.message}\n`;
                 console.error('Database test error:', error);
             }
+        },
+
+        formatIncorrectQuestion(question) {
+            if (!question) return '';
+
+            return {
+                id: question.id || '',
+                title: question.title || '',
+                chosenAnswer: question.chosenAnswer || ''
+            };
         }
     }
 }

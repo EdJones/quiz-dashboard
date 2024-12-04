@@ -221,7 +221,7 @@ export const quizStore = defineStore('quiz', {
                     return;
                 }
 
-                console.log('Saving user answer to SORQuizzes DB...');
+                // Clean data before saving to Firebase
                 const cleanUserAnswers = this.userAnswers.filter(answer =>
                     answer !== null && answer !== undefined
                 );
