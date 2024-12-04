@@ -242,7 +242,7 @@ export default {
 </script>
 
 <style scoped>
-/* Add these CSS variables */
+/* CSS Variables */
 :root {
     --text-primary: #333;
     --text-secondary: #666;
@@ -265,65 +265,21 @@ export default {
     }
 }
 
-/* Update existing styles */
-.user-progress {
-    color: var(--text-primary);
-    background-color: var(--bg-primary);
-}
-
-.progress-item {
-    border: 1px solid var(--border-color);
-    background-color: var(--item-bg-color);
-}
-
-.progress-header {
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.timestamp {
-    color: var(--text-secondary);
-}
-
-.detail-row {
-    color: var(--text-primary);
-}
-
-.quiz-stats {
-    color: var(--text-secondary);
-}
-
-.test-controls {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-}
-
-.test-results {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-
-.dashboard-data {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-
-.summary-display {
-    background-color: var(--item-bg-color);
-    color: var(--text-primary);
-}
-
-/* Keep your existing styles but update colors to use variables */
+/* Progress List Styling */
 .progress-list {
     margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .progress-item {
-    margin-bottom: 1rem;
-    padding: 1rem;
+    background-color: var(--item-bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
+    padding: 1.5rem;
+    transition: background-color 0.2s ease;
+    margin-bottom: 1rem;
 }
 
 .progress-item:hover {
@@ -334,8 +290,15 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.detail-row {
+    margin: 1rem 0;
+    color: var(--text-primary);
 }
 
 .id-info {
@@ -349,14 +312,138 @@ export default {
     color: var(--text-secondary);
 }
 
-/* Button styles */
+.quiz-stats {
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.timestamp {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+/* Answers Section */
+.answers-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem 0;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.question-count {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.answers-list {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.incorrect-list {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Button Styling */
 .button-75 {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     background-color: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .button-75:hover {
     background-color: var(--hover-bg);
+    transform: translateY(-1px);
+}
+
+.button-75:active {
+    transform: translateY(0);
+}
+
+.toggle-btn {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+/* Test Controls */
+.test-controls {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.test-results {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+}
+
+/* Dashboard Data */
+.dashboard-data {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.summary-display {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--item-bg-color);
+    border-radius: 4px;
+}
+
+/* Error State */
+.error {
+    color: #ff4444;
+    padding: 1rem;
+    border: 1px solid #ff4444;
+    border-radius: 4px;
+    margin: 1rem 0;
+    background-color: rgba(255, 68, 68, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .progress-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .button-75 {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
 </style>
