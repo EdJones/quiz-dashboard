@@ -267,12 +267,13 @@ export default {
 }
 
 .progress-item {
-    background-color: var(--item-bg-color);
-    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color, #ddd);
     border-radius: 8px;
-    padding: 1.5rem;
-    transition: background-color 0.2s ease;
-    margin-bottom: 1rem;
+    background-color: var(--item-bg-color, #f9f9f9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--text-color, #333);
 }
 
 .progress-item:hover {
