@@ -1,5 +1,10 @@
 <template>
     <div>
+        <!-- Add notification -->
+        <div v-if="notification.show" :class="['notification', notification.type]">
+            {{ notification.message }}
+        </div>
+
         <div class="header-controls">
             <h1>Admin Dashboard</h1>
             <button @click="handleLogout" class="button-75">Logout</button>
@@ -118,7 +123,12 @@ export default {
                 '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
             },
             debug: false,
-            testResults: null
+            testResults: null,
+            notification: {
+                show: false,
+                message: '',
+                type: 'success' // or 'error'
+            }
         }
     },
     computed: {
@@ -238,10 +248,23 @@ export default {
         async handleLogout() {
             try {
                 await signOutUser();
+                this.showNotification('Successfully logged out', 'success');
                 // Router will handle redirect based on auth state
             } catch (error) {
                 console.error('Logout error:', error);
+                this.showNotification('Error logging out: ' + error.message, 'error');
             }
+        },
+        showNotification(message, type = 'success') {
+            this.notification = {
+                show: true,
+                message,
+                type
+            };
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                this.notification.show = false;
+            }, 3000);
         }
     }
 }
@@ -460,5 +483,38 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+}
+
+/* Add notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.notification.error {
+    background-color: #f44336;
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 </style>
