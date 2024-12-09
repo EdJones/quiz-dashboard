@@ -1,10 +1,11 @@
 <template>
     <div>
-        <!-- Add notification -->
+        <!-- Notification -->
         <div v-if="notification.show" :class="['notification', notification.type]">
             {{ notification.message }}
         </div>
 
+        <!-- Header -->
         <div class="header-controls">
             <h1>Admin Dashboard</h1>
             <button @click="handleLogout" class="button-75">Logout</button>
@@ -18,156 +19,145 @@
             </div>
         </div>
 
-        <!-- Keep all your existing template code -->
-        <div class="user-progress">
-            <h3>SORQuizzes User Progress</h3>
+        <!-- Main Dashboard -->
+        <h2>Quizzes Dashboard</h2>
+
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-button" :class="{ active: activeTab === 'progress' }" @click="activeTab = 'progress'">
+                User Progress
+            </button>
+            <button class="tab-button" :class="{ active: activeTab === 'entries' }" @click="activeTab = 'entries'">
+                Quiz Entries
+            </button>
+        </div>
+
+        <!-- User Progress Tab -->
+        <div v-if="activeTab === 'progress'" class="user-progress">
+            <h3>User Progress</h3>
             <button class="button-75" @click="loadUserProgress">Load User Progress</button>
+
             <div v-if="userProgressList.length" class="progress-list">
                 <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
                     <div class="progress-header">
                         <h4>Quiz Attempt Details</h4>
                         <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span>
                     </div>
+
                     <div class="progress-details">
-                        <div class="detail-row">
-                            <div class="id-info">
-                                <div>
-                                    <strong>User ID:</strong>
-                                    {{ getUserDisplayName(progress.userId) }}
-                                </div>
-                                <div>
-                                    <strong>Quiz ID:</strong> {{ progress.quizId }}
-                                    <span v-if="progress.userAnswers?.length" class="quiz-stats">
-                                        ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
-                                        of {{ progress.userAnswers.length }} correct)
-                                    </span>
-                                </div>
-                                <div class="quiz-title">
-                                    {{ getQuizTitle(progress.quizId) }}
-                                </div>
+                        <div class="id-info">
+                            <div>
+                                <strong>User ID:</strong> {{ getUserDisplayName(progress.userId) }}
                             </div>
-                            <h2>Quizzes Dashboard</h2>
-                            <div class="tab-container">
-                                <button class="tab-button" :class="{ active: activeTab === 'progress' }"
-                                    @click="activeTab = 'progress'">
-                                    User Progress
-                                </button>
-                                <button class="tab-button" :class="{ active: activeTab === 'entries' }"
-                                    @click="activeTab = 'entries'">
-                                    Quiz Entries
-                                </button>
+                            <div>
+                                <strong>Quiz ID:</strong> {{ progress.quizId }}
+                                <span v-if="progress.userAnswers?.length" class="quiz-stats">
+                                    ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
+                                    of {{ progress.userAnswers.length }} correct)
+                                </span>
                             </div>
-                            <div class="admin-dashboard">
-                                <!-- User Progress Tab -->
-                                <div v-if="activeTab === 'progress'" class="user-progress">
-                                    <h3>User Progress</h3>
-                                    <button class="button-75" @click="loadUserProgress">Load User Progress</button>
-                                    <div v-if="userProgressList.length" class="progress-list">
-                                        <div v-for="progress in sortedProgress" :key="progress.id"
-                                            class="progress-item">
-                                            <div class="progress-header">
-                                                <h4>Quiz Attempt Details</h4>
-                                                <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span>
-                                            </div>
-                                            <div class="detail-row" v-if="progress.incorrectQuestions?.length">
-                                                <strong>Incorrect Questions:</strong>
-                                                <ul class="incorrect-list">
-                                                    <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                                        {{ formatIncorrectQuestion(q) }}
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <div class="detail-row">
-                                                <div class="answers-header" @click="toggleAnswers(progress.id)">
-                                                    <div class="header-info">
-                                                        <strong>Answers</strong>
-                                                        <span class="question-count"
-                                                            v-if="progress.userAnswers?.length">
-                                                            (Question {{ progress.userAnswers.length }})
-                                                        </span>
-                                                    </div>
-                                                    <button class="toggle-btn">
-                                                        {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
-                                                    </button>
-                                                </div>
-                                                <ul class="answers-list" v-if="showAnswersMap[progress.id]">
-                                                    <li v-for="(answer, index) in progress.userAnswers" :key="index">
-                                                        Q{{ index + 1 }}: {{ answer }}
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-else-if="error" class="error">
-                                    {{ error }}
-                                </div>
-                                <div v-else>
-                                    No user progress found
-                                </div>
-                            </div>
-
-                            <!-- Dashboard Data Section -->
-                            <div class="dashboard-data">
-                                <h3>Dashboard Analytics</h3>
-                                <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
-                                <div v-if="dashboardSummary" class="summary-display">
-                                    <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
-                                    <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
-                                    <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
-                                </div>
-
-                                <!-- Quiz Entries Tab -->
-                                <div v-if="activeTab === 'entries'" class="quiz-entries">
-                                    <h3>Quiz Entries</h3>
-                                    <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
-                                    <div v-if="quizEntriesList.length" class="entries-list">
-                                        <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
-                                            <div class="entry-header">
-                                                <h4>Quiz Entry Details</h4>
-                                                <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
-                                            </div>
-                                            <div class="entry-details">
-                                                <div class="detail-row">
-                                                    <strong>Quiz ID:</strong> {{ entry.quizId }}
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Question:</strong> {{ getQuestionText(entry) }}
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Title:</strong> {{ entry.title }}
-                                                </div>
-                                                <div class="detail-row" v-if="entry.subtitle">
-                                                    <strong>Subtitle:</strong> {{ entry.subtitle }}
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Options:</strong>
-                                                    <ul v-if="hasOptions(entry)">
-                                                        <li v-if="entry.option1">1. {{ entry.option1 }}</li>
-                                                        <li v-if="entry.option2">2. {{ entry.option2 }}</li>
-                                                        <li v-if="entry.option3">3. {{ entry.option3 }}</li>
-                                                        <li v-if="entry.option4">4. {{ entry.option4 }}</li>
-                                                        <li v-if="entry.option5">5. {{ entry.option5 }}</li>
-                                                    </ul>
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
-                                                </div>
-                                                <div class="detail-row" v-if="entry.timestamp">
-                                                    <strong>Timestamp:</strong> {{ formatDate(entry.timestamp) }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-else-if="entriesError" class="error">
-                                        {{ entriesError }}
-                                    </div>
-                                    <div v-else>
-                                        No quiz entries found
-                                    </div>
-                                </div>
+                            <div class="quiz-title">
+                                {{ getQuizTitle(progress.quizId) }}
                             </div>
                         </div>
+
+                        <div class="detail-row" v-if="progress.incorrectQuestions?.length">
+                            <strong>Incorrect Questions:</strong>
+                            <ul class="incorrect-list">
+                                <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
+                                    {{ formatIncorrectQuestion(q) }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="answers-header" @click="toggleAnswers(progress.id)">
+                                <div class="header-info">
+                                    <strong>Answers</strong>
+                                    <span class="question-count" v-if="progress.userAnswers?.length">
+                                        (Question {{ progress.userAnswers.length }})
+                                    </span>
+                                </div>
+                                <button class="toggle-btn">
+                                    {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
+                                </button>
+                            </div>
+                            <ul class="answers-list" v-if="showAnswersMap[progress.id]">
+                                <li v-for="(answer, index) in progress.userAnswers" :key="index">
+                                    Q{{ index + 1 }}: {{ answer }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="error" class="error">
+                {{ error }}
+            </div>
+            <div v-else>
+                No user progress found
+            </div>
+        </div>
+
+        <!-- Quiz Entries Tab -->
+        <div v-if="activeTab === 'entries'" class="quiz-entries">
+            <h3>Quiz Entries</h3>
+            <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
+
+            <div v-if="quizEntriesList.length" class="entries-list">
+                <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
+                    <div class="entry-header">
+                        <h4>Quiz Entry Details</h4>
+                        <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+                    </div>
+                    <div class="entry-details">
+                        <div class="detail-row">
+                            <strong>Quiz ID:</strong> {{ entry.quizId }}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Question:</strong> {{ getQuestionText(entry) }}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Title:</strong> {{ entry.title }}
+                        </div>
+                        <div class="detail-row" v-if="entry.subtitle">
+                            <strong>Subtitle:</strong> {{ entry.subtitle }}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Options:</strong>
+                            <ul v-if="hasOptions(entry)">
+                                <li v-if="entry.option1">1. {{ entry.option1 }}</li>
+                                <li v-if="entry.option2">2. {{ entry.option2 }}</li>
+                                <li v-if="entry.option3">3. {{ entry.option3 }}</li>
+                                <li v-if="entry.option4">4. {{ entry.option4 }}</li>
+                                <li v-if="entry.option5">5. {{ entry.option5 }}</li>
+                            </ul>
+                        </div>
+                        <div class="detail-row">
+                            <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="entriesError" class="error">
+                {{ entriesError }}
+            </div>
+            <div v-else>
+                No quiz entries found
+            </div>
+        </div>
+
+        <!-- Dashboard Data Section -->
+        <div class="dashboard-data">
+            <h3>Dashboard Analytics</h3>
+            <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
+            <div v-if="dashboardSummary" class="summary-display">
+                <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
+                <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
+                <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -348,7 +338,6 @@ export default {
             setTimeout(() => {
                 this.notification.show = false;
             }, 3000);
-            return `Quiz ${quizId}`;
         },
         async loadQuizEntries() {
             try {
@@ -703,4 +692,7 @@ export default {
                 --btn-bg-color: #333;
                 --btn-hover-bg-color: #555;
             }
-        }</style>
+        }
+    }
+}
+</style>
