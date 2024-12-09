@@ -377,7 +377,7 @@
 </template>
 
 <script>
-import { db } from '../firebase';
+import { sorQuizzesDb as db } from '../firebase';
 import { quizStore } from '../stores/quizStore';
 import QuizItem from './QuizItem.vue';
 import VueJsonPretty from 'vue-json-pretty'
