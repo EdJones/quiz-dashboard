@@ -93,6 +93,11 @@ export const signInWithGoogle = async () => {
 
 export const signInWithGithub = async () => {
     try {
+        // If there's an anonymous user, sign them out first
+        if (auth.currentUser?.isAnonymous) {
+            await signOut(auth);
+        }
+
         const result = await signInWithPopup(auth, githubProvider);
         console.log('Github sign in successful:', result.user.uid);
         return result.user;
@@ -109,7 +114,7 @@ export const signInAnonymouslyWithPersistence = async () => {
             console.log('New anonymous user signed in:', credential.user.uid);
             return credential.user;
         }
-        console.log('Existing anonymous user:', auth.currentUser.uid);
+        console.log('Existing user:', auth.currentUser.uid);
         return auth.currentUser;
     } catch (error) {
         console.error('Error in anonymous sign in:', error);
