@@ -1,6 +1,9 @@
 <template>
     <div>
-        <h1>Admin Dashboard</h1>
+        <div class="header-controls">
+            <h1>Admin Dashboard</h1>
+            <button @click="handleLogout" class="button-75">Logout</button>
+        </div>
 
         <!-- Test buttons -->
         <div v-if="debug" class="test-controls">
@@ -96,7 +99,8 @@ import {
     saveDashboardData,
     sorQuizzesDb,
     dashboardDb,
-    auth
+    auth,
+    signOutUser
 } from '../firebase';
 import { quizSets } from '../data/quizSets';
 
@@ -229,6 +233,15 @@ export default {
                 title: question.title || '',
                 chosenAnswer: question.chosenAnswer || ''
             };
+        },
+
+        async handleLogout() {
+            try {
+                await signOutUser();
+                // Router will handle redirect based on auth state
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
         }
     }
 }
@@ -439,5 +452,13 @@ export default {
         width: 100%;
         margin-bottom: 0.5rem;
     }
+}
+
+/* Header Controls */
+.header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 </style>

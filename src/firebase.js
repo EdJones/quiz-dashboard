@@ -17,7 +17,8 @@ import {
     GithubAuthProvider,
     signInAnonymously,
     setPersistence,
-    browserLocalPersistence
+    browserLocalPersistence,
+    signOut
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -112,6 +113,17 @@ export const signInAnonymouslyWithPersistence = async () => {
         return auth.currentUser;
     } catch (error) {
         console.error('Error in anonymous sign in:', error);
+        throw error;
+    }
+};
+
+// Add logout helper function
+export const signOutUser = async () => {
+    try {
+        await signOut(auth);
+        console.log('User signed out successfully');
+    } catch (error) {
+        console.error('Error signing out:', error);
         throw error;
     }
 };
