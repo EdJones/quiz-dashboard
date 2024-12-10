@@ -19,7 +19,9 @@ import {
     setPersistence,
     browserLocalPersistence,
     signOut,
-    fetchSignInMethodsForEmail
+    fetchSignInMethodsForEmail,
+    signInWithCredential,
+    linkWithCredential
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -94,25 +96,33 @@ export const signInWithGoogle = async () => {
 
 export const signInWithGithub = async () => {
     try {
-        // If there's an anonymous user, sign them out first
-        if (auth.currentUser?.isAnonymous) {
-            console.log('Signing out anonymous user...');
-            await signOut(auth);
+        console.log('Attempting GitHub sign in...');
+        const currentUser = auth.currentUser;
+
+        // If there's an anonymous user, try to link it
+        if (currentUser?.isAnonymous) {
+            console.log('Linking anonymous user with GitHub...');
+            const result = await signInWithPopup(auth, githubProvider);
+            const credential = GithubAuthProvider.credentialFromResult(result);
+
+            if (credential) {
+                await currentUser.linkWithCredential(credential);
+                console.log('Successfully linked anonymous account with GitHub');
+                return currentUser;
+            }
         }
 
-        console.log('Attempting GitHub sign in...');
+        // If no anonymous user, just do regular sign in
         const result = await signInWithPopup(auth, githubProvider);
         console.log('Github sign in successful:', result.user.uid);
         return result.user;
     } catch (error) {
-        if (error.code === 'auth/account-exists-with-different-credential') {
-            // Get the email from the error
-            const email = error.customData?.email;
-            if (email) {
-                // Fetch sign in methods for this email
-                const methods = await fetchSignInMethodsForEmail(auth, email);
-                console.log('Available sign in methods:', methods);
-                throw new Error(`This email is already associated with a different sign-in method. Please use: ${methods.join(', ')}`);
+        if (error.code === 'auth/credential-already-in-use') {
+            console.log('Account already exists, signing in with GitHub...');
+            const credential = GithubAuthProvider.credentialFromError(error);
+            if (credential) {
+                const result = await signInWithCredential(auth, credential);
+                return result.user;
             }
         }
 
