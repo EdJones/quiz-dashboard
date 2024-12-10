@@ -18,7 +18,8 @@ import {
     signInAnonymously,
     setPersistence,
     browserLocalPersistence,
-    signOut
+    signOut,
+    fetchSignInMethodsForEmail
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -95,14 +96,32 @@ export const signInWithGithub = async () => {
     try {
         // If there's an anonymous user, sign them out first
         if (auth.currentUser?.isAnonymous) {
+            console.log('Signing out anonymous user...');
             await signOut(auth);
         }
 
+        console.log('Attempting GitHub sign in...');
         const result = await signInWithPopup(auth, githubProvider);
         console.log('Github sign in successful:', result.user.uid);
         return result.user;
     } catch (error) {
-        console.error('Error in Github sign in:', error);
+        if (error.code === 'auth/account-exists-with-different-credential') {
+            // Get the email from the error
+            const email = error.customData?.email;
+            if (email) {
+                // Fetch sign in methods for this email
+                const methods = await fetchSignInMethodsForEmail(auth, email);
+                console.log('Available sign in methods:', methods);
+                throw new Error(`This email is already associated with a different sign-in method. Please use: ${methods.join(', ')}`);
+            }
+        }
+
+        console.error('Detailed GitHub sign in error:', {
+            code: error.code,
+            message: error.message,
+            email: error.customData?.email,
+            credential: error.credential
+        });
         throw error;
     }
 };
