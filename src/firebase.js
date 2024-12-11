@@ -81,6 +81,8 @@ setPersistence(auth, browserLocalPersistence)
 // Initialize providers
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
+githubProvider.addScope('repo'); // For creating issues
+githubProvider.addScope('user'); // For user information
 
 // Auth helper functions
 export const signInWithGoogle = async () => {
