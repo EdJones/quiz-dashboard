@@ -53,12 +53,14 @@ import { createRouter, createWebHistory } from 'vue-router'; // Import the route
 //import App from './App.vue'; // Import the main App component
 import NewItem from './components/NewItem.vue'; // Import the new component
 import Login from './components/Login.vue';
+import CreateIssue from './components/CreateIssue.vue';
 
 // Define your routes
 const routes = [
     { path: '/', component: App }, // Main application route
     { path: '/new-item', component: NewItem }, // New item route
-    { path: '/login', component: Login }
+    { path: '/login', component: Login },
+    { path: '/create-issue', component: CreateIssue }
 ];
 
 // Create the router instance

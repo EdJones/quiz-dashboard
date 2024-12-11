@@ -8,7 +8,10 @@
         <!-- Header -->
         <div class="header-controls">
             <h1>Admin Dashboard</h1>
-            <button @click="handleLogout" class="button-75">Logout</button>
+            <div class="header-buttons">
+                <router-link to="/create-issue" class="button-75">Create Issue</router-link>
+                <button @click="handleLogout" class="button-75">Logout</button>
+            </div>
         </div>
 
         <!-- Test buttons -->
@@ -498,6 +501,8 @@ export default {
     transition: all 0.2s ease;
     font-size: 1rem;
     font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .button-75:hover {
@@ -694,5 +699,11 @@ export default {
             }
         }
     }
+}
+
+.header-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 </style>
