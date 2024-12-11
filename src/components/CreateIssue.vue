@@ -75,10 +75,11 @@
                                 </span>
                             </div>
                         </div>
-                        <span :class="['issue-state', issue.state]">{{ issue.state }}</span>
-                    </div>
-                    <div class="issue-meta">
-                        #{{ issue.number }} opened {{ formatDate(issue.created_at) }}
+                        <div class="issue-meta-group">
+                            <span class="issue-meta">#{{ issue.number }} opened {{ formatDate(issue.created_at)
+                                }}</span>
+                            <span :class="['issue-state', issue.state]">{{ issue.state }}</span>
+                        </div>
                     </div>
                     <div class="issue-body-preview" v-if="issue.body">
                         {{ getBodyPreview(issue.body) }}
@@ -439,5 +440,16 @@ button {
 
 .filter-button:hover:not(.active) {
     opacity: 0.8;
+}
+
+.issue-meta-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.issue-meta {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 </style>
