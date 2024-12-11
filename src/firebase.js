@@ -106,9 +106,9 @@ export const signInWithGithub = async () => {
             const credential = GithubAuthProvider.credentialFromResult(result);
 
             if (credential) {
-                await currentUser.linkWithCredential(credential);
+                await linkWithCredential(auth.currentUser, credential);
                 console.log('Successfully linked anonymous account with GitHub');
-                return currentUser;
+                return auth.currentUser;
             }
         }
 
