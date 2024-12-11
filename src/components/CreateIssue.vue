@@ -282,7 +282,8 @@ button {
 }
 
 .issue-state {
-    padding: 0.25rem 0.75rem;
+    padding-left: 10px;
+    padding-right: 10px;
     border-radius: 12px;
     font-size: 0.875rem;
 }
@@ -290,6 +291,16 @@ button {
 .issue-state.open {
     background-color: #2ea44f;
     color: white;
+    border: 1px solid #2ea44f;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    height: 20px;
+
+
+
 }
 
 .issue-state.closed {
