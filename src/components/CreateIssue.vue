@@ -14,6 +14,8 @@
             <a :href="repoUrl" target="_blank" class="button-75">Go to Repository</a>
         </div>
 
+
+
         <!-- Create Issue Form -->
         <div v-if="showForm">
             <h2>Create GitHub Issue</h2>
@@ -41,13 +43,26 @@
             </form>
         </div>
 
+        <!-- State Filter -->
+        <div class="state-filter">
+            <button @click="filterState = 'all'" :class="['filter-button', { active: filterState === 'all' }]">
+                All Issues
+            </button>
+            <button @click="filterState = 'open'" :class="['filter-button', { active: filterState === 'open' }]">
+                Open
+            </button>
+            <button @click="filterState = 'closed'" :class="['filter-button', { active: filterState === 'closed' }]">
+                Closed
+            </button>
+        </div>
+
         <!-- Recent Issues -->
         <div class="recent-issues">
             <h3>Recent Issues</h3>
             <div v-if="loading" class="loading">Loading issues...</div>
             <div v-else-if="error" class="error">{{ error }}</div>
             <div v-else class="issues-list">
-                <div v-for="issue in issues" :key="issue.id" class="issue-item">
+                <div v-for="issue in filteredIssues" :key="issue.id" class="issue-item">
                     <div class="issue-header">
                         <div class="title-and-labels">
                             <h4>
@@ -95,7 +110,8 @@ export default {
             },
             issues: [],
             loading: false,
-            showForm: false
+            showForm: true,
+            filterState: 'open'
         }
     },
     async created() {
@@ -104,6 +120,10 @@ export default {
     computed: {
         repoUrl() {
             return `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+        },
+        filteredIssues() {
+            if (this.filterState === 'all') return this.issues;
+            return this.issues.filter(issue => issue.state === this.filterState);
         }
     },
     methods: {
@@ -132,6 +152,9 @@ export default {
                     body: '',
                     labels: ''
                 };
+
+                // Close the form
+                this.showForm = false;
 
                 // Reload issues list
                 await this.loadIssues();
@@ -269,7 +292,7 @@ button {
 
 .issue-item {
     padding: 1rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid #d0d7de;
     border-radius: 4px;
     margin-bottom: 1rem;
     background-color: var(--bg-primary);
@@ -378,5 +401,34 @@ button {
     align-items: baseline;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.state-filter {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    position: relative;
+}
+
+.filter-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #2ea44f;
+}
+
+.filter-button:hover:not(.active) {
+    opacity: 0.8;
 }
 </style>
