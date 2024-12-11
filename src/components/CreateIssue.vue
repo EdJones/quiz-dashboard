@@ -43,6 +43,10 @@
             </form>
         </div>
 
+
+
+        <!-- Issues -->
+        <h2>Issues</h2>
         <!-- State Filter -->
         <div class="state-filter">
             <button @click="filterState = 'all'" :class="['filter-button', { active: filterState === 'all' }]">
@@ -55,10 +59,7 @@
                 Closed
             </button>
         </div>
-
-        <!-- Recent Issues -->
         <div class="recent-issues">
-            <h3>Recent Issues</h3>
             <div v-if="loading" class="loading">Loading issues...</div>
             <div v-else-if="error" class="error">{{ error }}</div>
             <div v-else class="issues-list">
@@ -224,6 +225,14 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.issue-form button[type="submit"] {
+    align-self: flex-end;
 }
 
 .form-group {
