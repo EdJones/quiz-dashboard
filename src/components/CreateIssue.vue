@@ -49,9 +49,16 @@
             <div v-else class="issues-list">
                 <div v-for="issue in issues" :key="issue.id" class="issue-item">
                     <div class="issue-header">
-                        <h4>
-                            <a :href="issue.html_url" target="_blank">{{ issue.title }}</a>
-                        </h4>
+                        <div class="title-and-labels">
+                            <h4>
+                                <a :href="issue.html_url" target="_blank">{{ issue.title }}</a>
+                            </h4>
+                            <div class="issue-labels" v-if="issue.labels.length">
+                                <span v-for="label in issue.labels" :key="label.id" class="label">
+                                    {{ label.name }}
+                                </span>
+                            </div>
+                        </div>
                         <span :class="['issue-state', issue.state]">{{ issue.state }}</span>
                     </div>
                     <div class="issue-meta">
@@ -59,12 +66,6 @@
                     </div>
                     <div class="issue-body-preview" v-if="issue.body">
                         {{ getBodyPreview(issue.body) }}
-                    </div>
-                    <div class="issue-labels" v-if="issue.labels.length">
-                        <span v-for="label in issue.labels" :key="label.id" class="label"
-                            :style="{ backgroundColor: `#${label.color}` }">
-                            {{ label.name }}
-                        </span>
                     </div>
                 </div>
             </div>
@@ -152,6 +153,13 @@ export default {
                 }
 
                 this.issues = await getGithubIssues(token);
+                console.log('Labels:', this.issues.map(issue => ({
+                    title: issue.title,
+                    labels: issue.labels.map(label => ({
+                        name: label.name,
+                        color: `#${label.color}`
+                    }))
+                })));
             } catch (error) {
                 console.error('Error loading issues:', error);
                 this.error = error.message;
@@ -302,10 +310,16 @@ button {
 }
 
 .label {
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd2db;
+    background-color: #6b717b;
+    border: 1px solid #9da7b0;
 }
 
 @keyframes slideIn {
@@ -346,5 +360,12 @@ button {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
+}
+
+.title-and-labels {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 </style>
