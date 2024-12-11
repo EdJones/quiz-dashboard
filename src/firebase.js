@@ -107,6 +107,10 @@ export const signInWithGithub = async () => {
             try {
                 const result = await signInWithPopup(auth, githubProvider);
                 const credential = GithubAuthProvider.credentialFromResult(result);
+                const accessToken = credential.accessToken; // Get GitHub access token
+
+                // Store the access token in localStorage or user custom claims
+                localStorage.setItem('github_token', accessToken);
 
                 if (credential) {
                     await linkWithCredential(auth.currentUser, credential);
@@ -117,6 +121,9 @@ export const signInWithGithub = async () => {
                 if (linkError.code === 'auth/provider-already-linked') {
                     console.log('Provider already linked, proceeding with sign in');
                     const result = await signInWithPopup(auth, githubProvider);
+                    const credential = GithubAuthProvider.credentialFromResult(result);
+                    const accessToken = credential.accessToken;
+                    localStorage.setItem('github_token', accessToken);
                     return result.user;
                 }
                 throw linkError;
@@ -125,6 +132,9 @@ export const signInWithGithub = async () => {
 
         // If no anonymous user, just do regular sign in
         const result = await signInWithPopup(auth, githubProvider);
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        const accessToken = credential.accessToken;
+        localStorage.setItem('github_token', accessToken);
         console.log('Github sign in successful:', result.user.uid);
         return result.user;
     } catch (error) {

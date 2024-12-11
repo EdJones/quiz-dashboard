@@ -48,10 +48,10 @@ export default {
             this.error = null;
 
             try {
-                // Get the GitHub access token from the current user
-                const token = await auth.currentUser?.getIdToken();
+                // Get the GitHub access token from localStorage
+                const token = localStorage.getItem('github_token');
                 if (!token) {
-                    throw new Error('No authentication token available');
+                    throw new Error('No GitHub access token available');
                 }
 
                 const result = await createGithubIssue(this.issueData, token);
