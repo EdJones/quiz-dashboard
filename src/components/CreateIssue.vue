@@ -1,35 +1,42 @@
 <template>
     <div class="create-issue">
-        <!-- Success notification -->
+        <!-- Notification -->
         <div v-if="notification.show" :class="['notification', notification.type]">
             {{ notification.message }}
             <a v-if="notification.issueUrl" :href="notification.issueUrl" target="_blank">View Issue</a>
         </div>
 
-        <h2>Create GitHub Issue</h2>
+        <!-- Toggle Button -->
+        <button @click="toggleForm" class="button-75">
+            {{ showForm ? 'Hide Form' : 'Create New Issue' }}
+        </button>
 
-        <form @submit.prevent="submitIssue" class="issue-form">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input id="title" v-model="issueData.title" type="text" required placeholder="Issue title" />
-            </div>
+        <!-- Create Issue Form -->
+        <div v-if="showForm">
+            <h2>Create GitHub Issue</h2>
+            <form @submit.prevent="submitIssue" class="issue-form">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input id="title" v-model="issueData.title" type="text" required placeholder="Issue title" />
+                </div>
 
-            <div class="form-group">
-                <label for="body">Description:</label>
-                <textarea id="body" v-model="issueData.body" required placeholder="Describe the issue..."
-                    rows="5"></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="body">Description:</label>
+                    <textarea id="body" v-model="issueData.body" required placeholder="Describe the issue..."
+                        rows="5"></textarea>
+                </div>
 
-            <div class="form-group">
-                <label for="labels">Labels:</label>
-                <input id="labels" v-model="issueData.labels" type="text"
-                    placeholder="bug, enhancement (comma separated)" />
-            </div>
+                <div class="form-group">
+                    <label for="labels">Labels:</label>
+                    <input id="labels" v-model="issueData.labels" type="text"
+                        placeholder="bug, enhancement (comma separated)" />
+                </div>
 
-            <button type="submit" class="button-75" :disabled="isSubmitting">
-                {{ isSubmitting ? 'Creating...' : 'Create Issue' }}
-            </button>
-        </form>
+                <button type="submit" class="button-75" :disabled="isSubmitting">
+                    {{ isSubmitting ? 'Creating...' : 'Create Issue' }}
+                </button>
+            </form>
+        </div>
 
         <!-- Recent Issues -->
         <div class="recent-issues">
@@ -83,13 +90,17 @@ export default {
                 issueUrl: null
             },
             issues: [],
-            loading: false
+            loading: false,
+            showForm: false
         }
     },
     async created() {
         await this.loadIssues();
     },
     methods: {
+        toggleForm() {
+            this.showForm = !this.showForm;
+        },
         async submitIssue() {
             this.isSubmitting = true;
             this.error = null;
