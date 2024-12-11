@@ -31,4 +31,28 @@ export const createGithubIssue = async (issueData, accessToken) => {
         console.error('Error creating GitHub issue:', error);
         throw error;
     }
+};
+
+export const getGithubIssues = async (accessToken) => {
+    try {
+        const response = await fetch(
+            `${GITHUB_API_URL}/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&sort=created&direction=desc`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                }
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`GitHub API Error: ${errorData.message}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching GitHub issues:', error);
+        throw error;
+    }
 }; 
