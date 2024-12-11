@@ -102,13 +102,22 @@ export const signInWithGithub = async () => {
         // If there's an anonymous user, try to link it
         if (currentUser?.isAnonymous) {
             console.log('Linking anonymous user with GitHub...');
-            const result = await signInWithPopup(auth, githubProvider);
-            const credential = GithubAuthProvider.credentialFromResult(result);
+            try {
+                const result = await signInWithPopup(auth, githubProvider);
+                const credential = GithubAuthProvider.credentialFromResult(result);
 
-            if (credential) {
-                await linkWithCredential(auth.currentUser, credential);
-                console.log('Successfully linked anonymous account with GitHub');
-                return auth.currentUser;
+                if (credential) {
+                    await linkWithCredential(auth.currentUser, credential);
+                    console.log('Successfully linked anonymous account with GitHub');
+                    return auth.currentUser;
+                }
+            } catch (linkError) {
+                if (linkError.code === 'auth/provider-already-linked') {
+                    console.log('Provider already linked, proceeding with sign in');
+                    const result = await signInWithPopup(auth, githubProvider);
+                    return result.user;
+                }
+                throw linkError;
             }
         }
 
