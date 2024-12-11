@@ -1,6 +1,6 @@
-const GITHUB_API_URL = 'https://api.github.com';
-const REPO_OWNER = 'EdJones';
-const REPO_NAME = 'sor-quizzes';
+export const GITHUB_API_URL = 'https://api.github.com';
+export const REPO_OWNER = 'EdJones';
+export const REPO_NAME = 'sor-quizzes';
 
 export const createGithubIssue = async (issueData, accessToken) => {
     try {

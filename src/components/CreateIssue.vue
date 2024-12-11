@@ -6,10 +6,13 @@
             <a v-if="notification.issueUrl" :href="notification.issueUrl" target="_blank">View Issue</a>
         </div>
 
-        <!-- Toggle Button -->
-        <button @click="toggleForm" class="button-75">
-            {{ showForm ? 'Hide Form' : 'Create New Issue' }}
-        </button>
+        <!-- Header Controls -->
+        <div class="header-controls">
+            <button @click="toggleForm" class="button-75">
+                {{ showForm ? 'Hide Form' : 'Create New Issue' }}
+            </button>
+            <a :href="repoUrl" target="_blank" class="button-75">Go to Repository</a>
+        </div>
 
         <!-- Create Issue Form -->
         <div v-if="showForm">
@@ -70,7 +73,7 @@
 </template>
 
 <script>
-import { createGithubIssue, getGithubIssues } from '../services/github';
+import { createGithubIssue, getGithubIssues, REPO_OWNER, REPO_NAME } from '../services/github';
 
 export default {
     name: 'CreateIssue',
@@ -96,6 +99,11 @@ export default {
     },
     async created() {
         await this.loadIssues();
+    },
+    computed: {
+        repoUrl() {
+            return `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+        }
     },
     methods: {
         toggleForm() {
@@ -332,5 +340,11 @@ button {
     font-size: 0.9em;
     white-space: pre-line;
     line-height: 1.4;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 </style>
