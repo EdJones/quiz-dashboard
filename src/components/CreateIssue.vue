@@ -47,6 +47,9 @@
                     <div class="issue-meta">
                         #{{ issue.number }} opened {{ formatDate(issue.created_at) }}
                     </div>
+                    <div class="issue-body-preview" v-if="issue.body">
+                        {{ getBodyPreview(issue.body) }}
+                    </div>
                     <div class="issue-labels" v-if="issue.labels.length">
                         <span v-for="label in issue.labels" :key="label.id" class="label"
                             :style="{ backgroundColor: `#${label.color}` }">
@@ -150,6 +153,11 @@ export default {
         },
         formatDate(dateString) {
             return new Date(dateString).toLocaleDateString();
+        },
+        getBodyPreview(body) {
+            // Get first two lines, limited to 200 characters
+            const preview = body.split('\n').slice(0, 2).join('\n');
+            return preview.length > 200 ? preview.substring(0, 200) + '...' : preview;
         }
     }
 }
@@ -305,5 +313,13 @@ button {
     border: 1px solid #f44336;
     border-radius: 4px;
     margin: 1rem 0;
+}
+
+.issue-body-preview {
+    margin: 0.75rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    white-space: pre-line;
+    line-height: 1.4;
 }
 </style>
