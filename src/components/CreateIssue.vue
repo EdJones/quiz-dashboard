@@ -20,12 +20,15 @@
                     placeholder="bug, enhancement (comma separated)" />
             </div>
 
-            <button type="submit" class="button-75">Create Issue</button>
+            <button type="submit" class="button-75" :disabled="isSubmitting">Create Issue</button>
         </form>
     </div>
 </template>
 
 <script>
+import { createGithubIssue } from '../services/github';
+import { auth } from '../firebase';
+
 export default {
     name: 'CreateIssue',
     data() {
@@ -34,16 +37,40 @@ export default {
                 title: '',
                 body: '',
                 labels: ''
-            }
+            },
+            isSubmitting: false,
+            error: null
         }
     },
     methods: {
         async submitIssue() {
+            this.isSubmitting = true;
+            this.error = null;
+
             try {
-                // We'll implement this next
-                console.log('Submitting issue:', this.issueData);
+                // Get the GitHub access token from the current user
+                const token = await auth.currentUser?.getIdToken();
+                if (!token) {
+                    throw new Error('No authentication token available');
+                }
+
+                const result = await createGithubIssue(this.issueData, token);
+                console.log('Issue created:', result);
+
+                // Clear the form
+                this.issueData = {
+                    title: '',
+                    body: '',
+                    labels: ''
+                };
+
+                // Show success message
+                this.$emit('issue-created', result);
             } catch (error) {
-                console.error('Error creating issue:', error);
+                console.error('Error submitting issue:', error);
+                this.error = error.message;
+            } finally {
+                this.isSubmitting = false;
             }
         }
     }
