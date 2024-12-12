@@ -115,10 +115,19 @@
                     </div>
                     <div class="entry-details">
                         <div class="detail-row">
+                            <strong>ID:</strong> {{ entry.id }}
+                        </div>
+                        <div class="detail-row">
                             <strong>Quiz ID:</strong> {{ entry.quizId }}
                         </div>
                         <div class="detail-row">
                             <strong>Question:</strong> {{ getQuestionText(entry) }}
+                        </div>
+                        <div class="detail-row" v-if="entry.questionP2">
+                            <strong>Question Part 2:</strong> {{ entry.questionP2 }}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Answer Type:</strong> {{ entry.answer_type }}
                         </div>
                         <div class="detail-row">
                             <strong>Title:</strong> {{ entry.title }}
