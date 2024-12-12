@@ -8,7 +8,9 @@ import {
     getDocs,
     query,
     orderBy,
-    serverTimestamp
+    serverTimestamp,
+    addDoc,
+    where
 } from "firebase/firestore";
 import {
     getAuth,

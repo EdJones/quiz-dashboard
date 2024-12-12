@@ -173,6 +173,7 @@ import {
     auth,
     signOutUser
 } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import { quizSets } from '../data/quizSets';
 
 export default {
@@ -197,7 +198,8 @@ export default {
             },
             activeTab: 'progress',
             quizEntriesList: [],
-            entriesError: null
+            entriesError: null,
+            db: sorQuizzesDb
         }
     },
     computed: {
