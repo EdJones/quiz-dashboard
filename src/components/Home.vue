@@ -110,19 +110,14 @@
             <div v-if="quizEntriesList.length" class="entries-list">
                 <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
                     <div class="entry-header">
-                        <h4>Quiz Entry Details</h4>
+                        <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{
+                            entry.originalId }}</strong></h4>
+                        <h4 v-else>Suggested New Quiz Entry</h4>
+                        <span>ID: {{ entry.id }}</span>
+                        <span>Quiz ID: {{ entry.quizId }}</span>
                         <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
                     </div>
                     <div class="entry-details">
-                        <div class="detail-row">
-                            <strong>ID:</strong> {{ entry.id }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Original ID:</strong> {{ entry.originalId }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Quiz ID:</strong> {{ entry.quizId }}
-                        </div>
                         <div class="detail-row">
                             <strong>Question:</strong> {{ getQuestionText(entry) }}
                         </div>
@@ -814,6 +809,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    align-items: left;
 }
 
 .detail-row strong {
@@ -828,6 +824,7 @@ export default {
 
 .detail-row li {
     margin-bottom: 0.25rem;
+    align-items: left;
 }
 
 h1 {
