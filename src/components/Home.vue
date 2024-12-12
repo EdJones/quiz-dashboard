@@ -7,7 +7,7 @@
 
         <!-- Header -->
         <div class="header-controls">
-            <h1>Admin Dashboard</h1>
+            <h1>Dashboard -- SORQuizzes</h1>
             <div class="header-buttons">
                 <router-link to="/create-issue" class="button-75">Create Issue</router-link>
                 <button @click="handleLogout" class="button-75">Logout</button>
@@ -23,7 +23,7 @@
         </div>
 
         <!-- Main Dashboard -->
-        <h2>Quizzes Dashboard</h2>
+        <h2></h2>
 
         <!-- Tab Navigation -->
         <div class="tab-container">
@@ -719,5 +719,62 @@ export default {
     display: flex;
     gap: 1rem;
     align-items: center;
+}
+
+.quiz-entries {
+    margin-top: 1rem;
+}
+
+.entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.entry-item {
+    padding: 1rem;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.entry-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-row strong {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.detail-row ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.detail-row li {
+    margin-bottom: 0.25rem;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
 }
 </style>
