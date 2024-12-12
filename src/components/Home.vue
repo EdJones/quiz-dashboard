@@ -499,8 +499,10 @@ export default {
 }
 
 .detail-row {
-    margin: 1rem 0;
-    color: var(--text-primary);
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
 .id-info {
@@ -807,24 +809,27 @@ export default {
 
 .detail-row {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    align-items: left;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
 .detail-row strong {
     color: var(--text-secondary);
     font-size: 0.875rem;
+    min-width: 120px;
 }
 
 .detail-row ul {
     margin: 0.5rem 0;
-    padding-left: 1.5rem;
+    padding-left: 0;
+    list-style: none;
 }
 
 .detail-row li {
     margin-bottom: 0.25rem;
-    align-items: left;
+    display: flex;
+    align-items: flex-start;
 }
 
 h1 {
