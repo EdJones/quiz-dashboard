@@ -151,6 +151,30 @@
                         <div class="detail-row">
                             <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
                         </div>
+
+                        <template v-if="entry.originalId">
+                            <div class="comparison-header" v-if="hasDifferences(entry)">
+                                <h4>Changes from Original:</h4>
+                            </div>
+
+                            <template
+                                v-for="(field, fieldName) in compareEntries(entry, getOriginalEntry(entry.originalId))"
+                                :key="fieldName">
+                                <div class="detail-row difference">
+                                    <strong>{{ fieldName }}:</strong>
+                                    <div class="diff-view">
+                                        <div class="original">
+                                            <span class="diff-label">Original:</span>
+                                            <span class="diff-content">{{ field.original || 'empty' }}</span>
+                                        </div>
+                                        <div class="draft">
+                                            <span class="diff-label">Draft:</span>
+                                            <span class="diff-content">{{ field.draft || 'empty' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -809,5 +833,50 @@ export default {
 h1 {
     font-size: 2rem;
     font-weight: bold;
+}
+
+.comparison-header {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #d0d7de;
+}
+
+.difference {
+    background-color: #f6f8fa;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.diff-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.original,
+.draft {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+
+.diff-label {
+    font-size: 0.75rem;
+    color: #57606a;
+    min-width: 60px;
+}
+
+.diff-content {
+    flex: 1;
+}
+
+.original .diff-content {
+    color: #cf222e;
+    text-decoration: line-through;
+}
+
+.draft .diff-content {
+    color: #116329;
 }
 </style>
