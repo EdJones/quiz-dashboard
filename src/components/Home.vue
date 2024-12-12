@@ -136,11 +136,26 @@
                         <div class="detail-row">
                             <strong>Options:</strong>
                             <ul v-if="hasOptions(entry)">
-                                <li v-if="entry.option1">1. {{ entry.option1 }}</li>
-                                <li v-if="entry.option2">2. {{ entry.option2 }}</li>
-                                <li v-if="entry.option3">3. {{ entry.option3 }}</li>
-                                <li v-if="entry.option4">4. {{ entry.option4 }}</li>
-                                <li v-if="entry.option5">5. {{ entry.option5 }}</li>
+                                <li v-if="entry.option1"
+                                    :class="{ 'correct-option': 1 === parseInt(entry.correctAnswer) }">
+                                    1. {{ entry.option1 }}
+                                </li>
+                                <li v-if="entry.option2"
+                                    :class="{ 'correct-option': 2 === parseInt(entry.correctAnswer) }">
+                                    2. {{ entry.option2 }}
+                                </li>
+                                <li v-if="entry.option3"
+                                    :class="{ 'correct-option': 3 === parseInt(entry.correctAnswer) }">
+                                    3. {{ entry.option3 }}
+                                </li>
+                                <li v-if="entry.option4"
+                                    :class="{ 'correct-option': 4 === parseInt(entry.correctAnswer) }">
+                                    4. {{ entry.option4 }}
+                                </li>
+                                <li v-if="entry.option5"
+                                    :class="{ 'correct-option': 5 === parseInt(entry.correctAnswer) }">
+                                    5. {{ entry.option5 }}
+                                </li>
                             </ul>
                         </div>
                         <div class="detail-row">
@@ -880,5 +895,15 @@ h1 {
 
 .draft .diff-content {
     color: #116329;
+}
+
+.correct-option {
+    background-color: rgba(127, 255, 212, 0.3);
+    /* Lighter aquamarine with transparency */
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-left: -0.5rem;
+    /* Compensate for padding */
+    margin-right: -0.5rem;
 }
 </style>
