@@ -187,6 +187,7 @@ import {
 } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { quizSets } from '../data/quizSets';
+import { quizEntries } from '../data/quiz-items';
 
 export default {
     name: 'Home',
@@ -385,6 +386,38 @@ export default {
         },
         hasOptions(entry) {
             return entry.option1 || entry.option2 || entry.option3 || entry.option4 || entry.option5;
+        },
+        getOriginalEntry(originalId) {
+            return quizEntries.find(entry => entry.id === parseInt(originalId));
+        },
+        compareEntries(draft, original) {
+            const differences = {};
+            const fieldsToCompare = [
+                'title', 'subtitle', 'Question', 'questionP2',
+                'answer_type', 'option1', 'option2', 'option3',
+                'option4', 'option5', 'correctAnswer', 'explanation',
+                'explanation2', 'caution'
+            ];
+
+            fieldsToCompare.forEach(field => {
+                if (draft[field] !== original[field] &&
+                    (draft[field] || original[field])) { // Only if at least one has a value
+                    differences[field] = {
+                        draft: draft[field],
+                        original: original[field]
+                    };
+                }
+            });
+
+            return differences;
+        },
+        hasDifferences(entry) {
+            if (!entry.originalId) return false;
+            const original = this.getOriginalEntry(entry.originalId);
+            if (!original) return false;
+
+            const differences = this.compareEntries(entry, original);
+            return Object.keys(differences).length > 0;
         }
     }
 }
