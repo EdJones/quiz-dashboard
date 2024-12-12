@@ -118,6 +118,9 @@
                             <strong>ID:</strong> {{ entry.id }}
                         </div>
                         <div class="detail-row">
+                            <strong>Original ID:</strong> {{ entry.originalId }}
+                        </div>
+                        <div class="detail-row">
                             <strong>Quiz ID:</strong> {{ entry.quizId }}
                         </div>
                         <div class="detail-row">
