@@ -119,6 +119,9 @@
                     </div>
                     <div class="entry-details">
                         <div class="detail-row">
+                            <strong>Title:</strong> {{ entry.title }}
+                        </div>
+                        <div class="detail-row">
                             <strong>Question:</strong> {{ getQuestionText(entry) }}
                         </div>
                         <div class="detail-row" v-if="entry.questionP2">
@@ -126,9 +129,6 @@
                         </div>
                         <div class="detail-row">
                             <strong>Answer Type:</strong> {{ entry.answer_type }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Title:</strong> {{ entry.title }}
                         </div>
                         <div class="detail-row" v-if="entry.subtitle">
                             <strong>Subtitle:</strong> {{ entry.subtitle }}
