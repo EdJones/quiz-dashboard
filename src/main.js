@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createPinia, defineStore } from 'pinia'
+import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -19,6 +19,14 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 
 import { inject } from '@vercel/analytics';
 
+// Initialize Vercel Analytics only in production
+if (import.meta.env.PROD) {
+    inject({
+        mode: 'production',
+        debug: false,
+    });
+}
+
 //import * as LottiePlayer from "@lottiefiles/lottie-player";
 import Vue3Lottie from 'vue3-lottie'
 
@@ -33,8 +41,6 @@ import {
     GoogleAuthProvider,
     GithubAuthProvider
 } from 'firebase/auth';
-
-inject();
 
 library.add(faUserSecret)
 library.add(faCircleQuestion)
@@ -76,101 +82,46 @@ const router = createRouter({
     routes,
 });
 
-app.use(router); // Use the router
 app.use(pinia);
+app.use(router); // Use the router
 
-// Create an auth store with Pinia
-export const useAuthStore = defineStore('auth', {
-    state: () => ({
-        user: null,
-        loading: true,
-        error: null,
-        isAuthRedirecting: false
-    }),
-    actions: {
-        async signInWithGoogle() {
-            try {
-                this.error = null;
-                this.isAuthRedirecting = true;
-                await signInWithRedirect(auth, new GoogleAuthProvider());
-                // The page will redirect here, so no need to return anything
-            } catch (error) {
-                console.error('Error starting Google sign-in:', error);
-                this.error = error.message;
-                this.isAuthRedirecting = false;
-                throw error;
-            }
-        },
+// NOW we can import and use the store
+import { useAuthStore } from './stores/auth'
 
-        async signInWithGithub() {
-            try {
-                this.error = null;
-                this.isAuthRedirecting = true;
-                await signInWithRedirect(auth, new GithubAuthProvider());
-                // The page will redirect here
-            } catch (error) {
-                console.error('Error starting Github sign-in:', error);
-                this.error = error.message;
-                this.isAuthRedirecting = false;
-                throw error;
-            }
-        },
+// Initialize auth store
+const authStore = useAuthStore()
 
-        async handleRedirectResult() {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    this.user = result.user;
-                    this.isAuthRedirecting = false;
-                    return result.user;
-                }
-            } catch (error) {
-                console.error('Error completing sign-in:', error);
-                this.error = error.message;
-                this.isAuthRedirecting = false;
-                throw error;
-            }
-        },
+// Initialize auth listener
+authStore.initializeAuthListener()
 
-        async signInAnonymously() {
-            try {
-                const user = await signInAnonymouslyWithPersistence();
-                this.user = user;
-                return user;
-            } catch (error) {
-                console.error('Error signing in:', error);
-                this.error = error.message;
-                throw error;
-            }
-        },
-
-        initializeAuthListener() {
-            auth.onAuthStateChanged((user) => {
-                this.user = user;
-                this.loading = false;
-                console.log('Auth state changed:', user ? user.uid : 'No user');
-            });
-        }
-    }
-});
-
-// Modify the initialization to handle redirect results
-const authStore = useAuthStore(pinia);
-authStore.initializeAuthListener();
-authStore.handleRedirectResult().catch(console.error);
-if (!authStore.user) {
-    authStore.signInAnonymously().catch(console.error);
-}
+// Handle any pending redirect results
+authStore.handleRedirectResult().catch(console.error)
 
 // Add navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
     const publicPages = ['/login'];
     const authRequired = !publicPages.includes(to.path);
 
+    // Wait for initial auth state to be resolved
+    if (authStore.loading) {
+        // Wait for the auth state to be determined
+        await new Promise(resolve => {
+            const unsubscribe = auth.onAuthStateChanged(() => {
+                unsubscribe();
+                resolve();
+            });
+        });
+    }
+
     if (authRequired && !authStore.user) {
+        // Not logged in, redirect to login page
         next('/login');
+    } else if (to.path === '/login' && authStore.user) {
+        // Already logged in, redirect to home
+        next('/');
     } else {
+        // Proceed as normal
         next();
     }
 });

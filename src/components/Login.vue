@@ -23,13 +23,16 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '../main';
+import { useAuthStore } from '../stores/auth';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
 const handleGoogleLogin = async () => {
     try {
         await authStore.signInWithGoogle();
+        // The redirect will happen automatically
     } catch (error) {
         // Error is handled in the store
     }
@@ -38,10 +41,16 @@ const handleGoogleLogin = async () => {
 const handleGithubLogin = async () => {
     try {
         await authStore.signInWithGithub();
+        // The redirect will happen automatically
     } catch (error) {
         // Error is handled in the store
     }
 };
+
+// If user is already authenticated, redirect to home
+if (authStore.user) {
+    router.push('/');
+}
 </script>
 
 <style scoped>
