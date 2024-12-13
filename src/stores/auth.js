@@ -46,16 +46,12 @@ export const useAuthStore = defineStore('auth', {
                 // Get the Firebase app instance
                 const app = auth.app;
 
-                // Log Firebase config
-                console.log('[Auth] Firebase config:', {
+                // Log Firebase config and current URL
+                console.log('[Auth] Auth attempt:', {
                     authDomain: app.options.authDomain,
                     projectId: app.options.projectId,
-                    deployedURL: window.location.origin
-                });
-
-                // Set production redirect URL
-                provider.setCustomParameters({
-                    redirect_uri: 'https://quiz-dashboard-alpha.vercel.app'
+                    currentURL: window.location.href,
+                    isProduction: window.location.hostname === 'quiz-dashboard-alpha.vercel.app'
                 });
 
                 // Save state before redirect
@@ -63,19 +59,14 @@ export const useAuthStore = defineStore('auth', {
                 localStorage.setItem('authRedirectTime', Date.now().toString());
                 console.log('[Auth] Starting GitHub auth redirect...');
 
-                // Try the redirect with explicit error handling
-                try {
-                    await signInWithRedirect(auth, provider);
-                } catch (redirectError) {
-                    console.error('[Auth] Immediate redirect error:', {
-                        code: redirectError.code,
-                        message: redirectError.message,
-                        stack: redirectError.stack
-                    });
-                    throw redirectError;
-                }
+                // Let Firebase handle the redirect URI
+                await signInWithRedirect(auth, provider);
             } catch (error) {
-                console.error('[Auth] Error initiating GitHub redirect:', error);
+                console.error('[Auth] Error initiating GitHub redirect:', {
+                    code: error.code,
+                    message: error.message,
+                    currentURL: window.location.href
+                });
                 this.error = error.message;
                 this.lastRedirectError = error;
                 this.isAuthRedirecting = false;
