@@ -23,7 +23,8 @@ import {
     signOut,
     fetchSignInMethodsForEmail,
     signInWithCredential,
-    linkWithCredential
+    linkWithCredential,
+    connectAuthEmulator
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -67,6 +68,16 @@ const db1 = getFirestore(app1);
 
 // Get Auth instance (using app1 for auth)
 const auth = getAuth(app1);
+
+// Connect to auth emulator in development
+if (import.meta.env.DEV) {
+    try {
+        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+        console.log('[Firebase] Connected to auth emulator');
+    } catch (error) {
+        console.error('[Firebase] Error connecting to auth emulator:', error);
+    }
+}
 
 // Initialize analytics with the first app
 const analytics = getAnalytics(app1);
@@ -262,3 +273,8 @@ console.log('SORQuizzes DB initialized with project:', firebaseConfig1.projectId
 
 // Export both databases and auth
 export { db1 as sorQuizzesDb, db2 as dashboardDb, auth, analytics };
+
+console.log('Firebase Auth Config:', {
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN
+});
