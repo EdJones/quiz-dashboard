@@ -7,12 +7,12 @@ const router = createRouter({
         {
             path: '/',
             name: 'home',
-            component: () => import('./views/Home.vue')
+            component: () => import('./components/Home.vue')
         },
         {
             path: '/login',
             name: 'login',
-            component: () => import('./views/Login.vue')
+            component: () => import('./components/Login.vue')
         },
         // Add a catch-all route for the auth handler
         {
