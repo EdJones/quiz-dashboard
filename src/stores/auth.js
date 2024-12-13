@@ -46,12 +46,16 @@ export const useAuthStore = defineStore('auth', {
                 // Get the Firebase app instance
                 const app = auth.app;
 
-                // Log Firebase auth config
+                // Log Firebase config
                 console.log('[Auth] Firebase config:', {
                     authDomain: app.options.authDomain,
-                    apiKey: app.options.apiKey !== undefined,
                     projectId: app.options.projectId,
-                    appName: app.name
+                    deployedURL: window.location.origin
+                });
+
+                // Set production redirect URL
+                provider.setCustomParameters({
+                    redirect_uri: 'https://quiz-dashboard-alpha.vercel.app'
                 });
 
                 // Save state before redirect
