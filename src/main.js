@@ -27,6 +27,13 @@ import 'vue-lite-youtube-embed/style.css'
 
 import { auth, signInAnonymouslyWithPersistence, signInWithGoogle, signInWithGithub, analytics } from './firebase';
 
+import {
+    signInWithRedirect,
+    getRedirectResult,
+    GoogleAuthProvider,
+    GithubAuthProvider
+} from 'firebase/auth';
+
 inject();
 
 library.add(faUserSecret)
@@ -77,29 +84,50 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
         loading: true,
-        error: null
+        error: null,
+        isAuthRedirecting: false
     }),
     actions: {
         async signInWithGoogle() {
             try {
-                const user = await signInWithGoogle();
-                this.user = user;
-                return user;
+                this.error = null;
+                this.isAuthRedirecting = true;
+                await signInWithRedirect(auth, new GoogleAuthProvider());
+                // The page will redirect here, so no need to return anything
             } catch (error) {
-                console.error('Error signing in with Google:', error);
+                console.error('Error starting Google sign-in:', error);
                 this.error = error.message;
+                this.isAuthRedirecting = false;
                 throw error;
             }
         },
 
         async signInWithGithub() {
             try {
-                const user = await signInWithGithub();
-                this.user = user;
-                return user;
+                this.error = null;
+                this.isAuthRedirecting = true;
+                await signInWithRedirect(auth, new GithubAuthProvider());
+                // The page will redirect here
             } catch (error) {
-                console.error('Error signing in with Github:', error);
+                console.error('Error starting Github sign-in:', error);
                 this.error = error.message;
+                this.isAuthRedirecting = false;
+                throw error;
+            }
+        },
+
+        async handleRedirectResult() {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    this.user = result.user;
+                    this.isAuthRedirecting = false;
+                    return result.user;
+                }
+            } catch (error) {
+                console.error('Error completing sign-in:', error);
+                this.error = error.message;
+                this.isAuthRedirecting = false;
                 throw error;
             }
         },
@@ -126,10 +154,13 @@ export const useAuthStore = defineStore('auth', {
     }
 });
 
-// Initialize auth store and sign in anonymously
+// Modify the initialization to handle redirect results
 const authStore = useAuthStore(pinia);
 authStore.initializeAuthListener();
-authStore.signInAnonymously().catch(console.error);
+authStore.handleRedirectResult().catch(console.error);
+if (!authStore.user) {
+    authStore.signInAnonymously().catch(console.error);
+}
 
 // Add navigation guard
 router.beforeEach((to, from, next) => {
