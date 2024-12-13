@@ -18,13 +18,43 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async signInWithGoogle() {
             try {
+                // Clear any previous state
+                localStorage.removeItem('authRedirectPending');
+                localStorage.removeItem('authRedirectTime');
                 this.error = null;
-                this.isAuthRedirecting = true;
-                await signInWithRedirect(auth, new GoogleAuthProvider());
-            } catch (error) {
-                console.error('Error starting Google sign-in:', error);
-                this.error = error.message;
+                this.lastRedirectError = null;
                 this.isAuthRedirecting = false;
+
+                console.log('[Auth] Starting Google sign-in redirect flow');
+
+                const provider = new GoogleAuthProvider();
+
+                // Log Firebase config and current URL
+                console.log('[Auth] Auth attempt:', {
+                    authDomain: app.options.authDomain,
+                    projectId: app.options.projectId,
+                    currentURL: window.location.href,
+                    isProduction: window.location.hostname === 'quiz-dashboard-alpha.vercel.app'
+                });
+
+                // Save state before redirect
+                localStorage.setItem('authRedirectPending', 'google');
+                localStorage.setItem('authRedirectTime', Date.now().toString());
+                console.log('[Auth] Starting Google auth redirect...');
+
+                // Let Firebase handle the redirect URI
+                await signInWithRedirect(auth, provider);
+            } catch (error) {
+                console.error('[Auth] Error initiating Google redirect:', {
+                    code: error.code,
+                    message: error.message,
+                    currentURL: window.location.href
+                });
+                this.error = error.message;
+                this.lastRedirectError = error;
+                this.isAuthRedirecting = false;
+                localStorage.removeItem('authRedirectPending');
+                localStorage.removeItem('authRedirectTime');
                 throw error;
             }
         },
