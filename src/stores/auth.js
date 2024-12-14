@@ -4,7 +4,9 @@ import {
     signInWithRedirect,
     getRedirectResult,
     GoogleAuthProvider,
-    GithubAuthProvider
+    GithubAuthProvider,
+    setPersistence,
+    browserLocalPersistence
 } from 'firebase/auth';
 
 export const useAuthStore = defineStore('auth', {
@@ -153,18 +155,25 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        initializeAuthListener() {
+        async initializeAuthListener() {
             console.log('[Auth] Initializing auth listener');
+
+            // Set persistence to LOCAL
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                console.log('Firebase persistence enabled');
+            } catch (error) {
+                console.error('Error setting persistence:', error);
+            }
+
+            // Listen for auth state changes
             auth.onAuthStateChanged((user) => {
-                const pendingAuth = localStorage.getItem('authRedirectPending');
-                const redirectTime = localStorage.getItem('authRedirectTime');
                 console.log('[Auth] State changed:', {
-                    user: user ? `${user.email} (${user.uid})` : 'No user',
-                    pendingAuth,
-                    redirectTime
+                    user: user ? user.uid : 'No user',
+                    pendingAuth: localStorage.getItem('authRedirectPending'),
+                    redirectTime: localStorage.getItem('authRedirectTime')
                 });
                 this.user = user;
-                this.loading = false;
             });
         }
     }
