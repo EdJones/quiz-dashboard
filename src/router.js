@@ -18,7 +18,7 @@ const router = createRouter({
         {
             path: '/__/auth/handler',
             name: 'auth-handler',
-            component: () => import('./views/AuthHandler.vue')
+            component: () => import('./components/AuthHandler.vue')
         }
     ]
 })
