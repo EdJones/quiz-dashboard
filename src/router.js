@@ -7,14 +7,14 @@ const router = createRouter({
         {
             path: '/',
             name: 'home',
-            component: () => import('./components/Home.vue')
+            component: () => import('./components/Home.vue'),
+            meta: { requiresAuth: true }
         },
         {
             path: '/login',
             name: 'login',
             component: () => import('./components/Login.vue')
         },
-        // Update path to components directory
         {
             path: '/__/auth/handler',
             name: 'auth-handler',
@@ -38,6 +38,16 @@ router.beforeEach(async (to, from, next) => {
             next('/login');
         }
         return;
+    }
+
+    // Check if route requires auth
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        // Check if user is logged in
+        if (!authStore.user) {
+            console.log('[Router] Unauthenticated user attempting to access:', to.path);
+            next('/login');
+            return;
+        }
     }
 
     next();
