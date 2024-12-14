@@ -59,10 +59,9 @@ app.component(LiteYouTubeEmbed)
 import { useAuthStore } from './stores/auth'
 const authStore = useAuthStore()
 
-// Initialize auth listener
-authStore.initializeAuthListener()
-
-// Handle any pending redirect results
-authStore.handleRedirectResult().catch(console.error)
-
-app.mount('#app')
+// Wait for auth to be ready before mounting
+authStore.initializeAuthListener().then(() => {
+    app.mount('#app')
+}).catch(error => {
+    console.error('[Main] Error initializing auth:', error)
+})

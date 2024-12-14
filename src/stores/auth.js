@@ -15,7 +15,8 @@ export const useAuthStore = defineStore('auth', {
         user: null,
         error: null,
         isAuthRedirecting: false,
-        lastRedirectError: null
+        lastRedirectError: null,
+        isAuthReady: false
     }),
     actions: {
         async initializeAuthListener() {
@@ -24,19 +25,25 @@ export const useAuthStore = defineStore('auth', {
             // Set persistence to LOCAL
             try {
                 await setPersistence(auth, browserLocalPersistence);
-                console.log('Firebase persistence enabled');
+                console.log('[Auth] Firebase persistence enabled');
             } catch (error) {
-                console.error('Error setting persistence:', error);
+                console.error('[Auth] Error setting persistence:', error);
             }
 
-            // Listen for auth state changes
-            auth.onAuthStateChanged((user) => {
-                console.log('[Auth] State changed:', {
-                    user: user ? user.uid : 'No user',
-                    pendingAuth: localStorage.getItem('authRedirectPending'),
-                    redirectTime: localStorage.getItem('authRedirectTime')
+            // Return a promise that resolves when initial auth state is determined
+            return new Promise((resolve) => {
+                auth.onAuthStateChanged((user) => {
+                    console.log('[Auth] State changed:', {
+                        user: user ? user.uid : 'No user',
+                        pendingAuth: localStorage.getItem('authRedirectPending'),
+                        redirectTime: localStorage.getItem('authRedirectTime')
+                    });
+                    this.user = user;
+                    if (!this.isAuthReady) {
+                        this.isAuthReady = true;
+                        resolve(user);
+                    }
                 });
-                this.user = user;
             });
         },
 
