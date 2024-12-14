@@ -93,16 +93,16 @@ export const useAuthStore = defineStore('auth', {
             const redirectTime = localStorage.getItem('authRedirectTime');
             const MAX_REDIRECT_AGE = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-            try {
-                // Check for and clear stale redirect state
-                if (redirectTime && Date.now() - parseInt(redirectTime) > MAX_REDIRECT_AGE) {
-                    console.log('[Auth] Clearing stale redirect state');
-                    localStorage.removeItem('authRedirectPending');
-                    localStorage.removeItem('authRedirectTime');
-                    this.isAuthRedirecting = false;
-                    return;
-                }
+            // Clear any stale state immediately
+            if (!redirectTime || Date.now() - parseInt(redirectTime) > MAX_REDIRECT_AGE) {
+                console.log('[Auth] Clearing stale or invalid redirect state');
+                localStorage.removeItem('authRedirectPending');
+                localStorage.removeItem('authRedirectTime');
+                this.isAuthRedirecting = false;
+                return null;
+            }
 
+            try {
                 console.log('[Auth] Checking redirect result:', {
                     pendingAuth,
                     redirectTime,
@@ -111,6 +111,11 @@ export const useAuthStore = defineStore('auth', {
                 });
 
                 const result = await getRedirectResult(auth);
+
+                // Clear state after getting result
+                localStorage.removeItem('authRedirectPending');
+                localStorage.removeItem('authRedirectTime');
+
                 if (result) {
                     console.log('[Auth] Successfully authenticated:', result.user.email);
 
@@ -122,17 +127,11 @@ export const useAuthStore = defineStore('auth', {
 
                     this.user = result.user;
                     this.isAuthRedirecting = false;
-                    localStorage.removeItem('authRedirectPending');
-                    localStorage.removeItem('authRedirectTime');
                     return result.user;
-                } else if (pendingAuth && Date.now() - parseInt(redirectTime) <= MAX_REDIRECT_AGE) {
-                    console.log('[Auth] Redirect is pending, checking error state');
-                    this.isAuthRedirecting = true;
                 } else {
-                    console.log('[Auth] No pending redirect or result');
+                    console.log('[Auth] No redirect result');
                     this.isAuthRedirecting = false;
-                    localStorage.removeItem('authRedirectPending');
-                    localStorage.removeItem('authRedirectTime');
+                    return null;
                 }
             } catch (error) {
                 console.error('[Auth] Error handling redirect:', {

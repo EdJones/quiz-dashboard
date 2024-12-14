@@ -23,10 +23,12 @@ const router = createRouter({
     ]
 })
 
+// Initialize auth listener
+const authStore = useAuthStore();
+authStore.initializeAuthListener();
+
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore()
-
     // Handle auth redirects
     if (to.path.startsWith('/__/auth')) {
         console.log('[Router] Handling auth callback');
