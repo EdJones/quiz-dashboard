@@ -91,8 +91,18 @@ export const useAuthStore = defineStore('auth', {
         async handleRedirectResult() {
             const pendingAuth = localStorage.getItem('authRedirectPending');
             const redirectTime = localStorage.getItem('authRedirectTime');
+            const MAX_REDIRECT_AGE = 5 * 60 * 1000; // 5 minutes in milliseconds
 
             try {
+                // Check for and clear stale redirect state
+                if (redirectTime && Date.now() - parseInt(redirectTime) > MAX_REDIRECT_AGE) {
+                    console.log('[Auth] Clearing stale redirect state');
+                    localStorage.removeItem('authRedirectPending');
+                    localStorage.removeItem('authRedirectTime');
+                    this.isAuthRedirecting = false;
+                    return;
+                }
+
                 console.log('[Auth] Checking redirect result:', {
                     pendingAuth,
                     redirectTime,
@@ -115,12 +125,14 @@ export const useAuthStore = defineStore('auth', {
                     localStorage.removeItem('authRedirectPending');
                     localStorage.removeItem('authRedirectTime');
                     return result.user;
-                } else if (pendingAuth) {
+                } else if (pendingAuth && Date.now() - parseInt(redirectTime) <= MAX_REDIRECT_AGE) {
                     console.log('[Auth] Redirect is pending, checking error state');
                     this.isAuthRedirecting = true;
                 } else {
                     console.log('[Auth] No pending redirect or result');
                     this.isAuthRedirecting = false;
+                    localStorage.removeItem('authRedirectPending');
+                    localStorage.removeItem('authRedirectTime');
                 }
             } catch (error) {
                 console.error('[Auth] Error handling redirect:', {
