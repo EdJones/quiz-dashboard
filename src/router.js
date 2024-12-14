@@ -14,7 +14,7 @@ const router = createRouter({
             name: 'login',
             component: () => import('./components/Login.vue')
         },
-        // Add a catch-all route for the auth handler
+        // Update path to components directory
         {
             path: '/__/auth/handler',
             name: 'auth-handler',
