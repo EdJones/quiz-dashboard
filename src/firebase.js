@@ -23,7 +23,9 @@ import {
     signOut,
     fetchSignInMethodsForEmail,
     signInWithCredential,
-    linkWithCredential
+    linkWithCredential,
+    connectAuthEmulator,
+    signInWithRedirect
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -68,6 +70,16 @@ const db1 = getFirestore(app1);
 // Get Auth instance (using app1 for auth)
 const auth = getAuth(app1);
 
+// Connect to auth emulator in development
+if (import.meta.env.DEV) {
+    try {
+        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+        console.log('[Firebase] Connected to auth emulator');
+    } catch (error) {
+        console.error('[Firebase] Error connecting to auth emulator:', error);
+    }
+}
+
 // Initialize analytics with the first app
 const analytics = getAnalytics(app1);
 
@@ -80,85 +92,7 @@ setPersistence(auth, browserLocalPersistence)
         console.error('Error enabling persistence:', error);
     });
 
-// Initialize providers
-const googleProvider = new GoogleAuthProvider();
-const githubProvider = new GithubAuthProvider();
-githubProvider.addScope('repo'); // For creating issues
-githubProvider.addScope('user'); // For user information
-
 // Auth helper functions
-export const signInWithGoogle = async () => {
-    try {
-        const result = await signInWithPopup(auth, googleProvider);
-        console.log('Google sign in successful:', result.user.uid);
-        return result.user;
-    } catch (error) {
-        console.error('Error in Google sign in:', error);
-        throw error;
-    }
-};
-
-export const signInWithGithub = async () => {
-    try {
-        console.log('Attempting GitHub sign in...');
-        const currentUser = auth.currentUser;
-
-        // If there's an anonymous user, try to link it
-        if (currentUser?.isAnonymous) {
-            console.log('Linking anonymous user with GitHub...');
-            try {
-                const result = await signInWithPopup(auth, githubProvider);
-                const credential = GithubAuthProvider.credentialFromResult(result);
-                const accessToken = credential.accessToken; // Get GitHub access token
-
-                // Store the access token in localStorage or user custom claims
-                localStorage.setItem('github_token', accessToken);
-
-                if (credential) {
-                    await linkWithCredential(auth.currentUser, credential);
-                    console.log('Successfully linked anonymous account with GitHub');
-                    return auth.currentUser;
-                }
-            } catch (linkError) {
-                if (linkError.code === 'auth/provider-already-linked') {
-                    console.log('Provider already linked, proceeding with sign in');
-                    const result = await signInWithPopup(auth, githubProvider);
-                    const credential = GithubAuthProvider.credentialFromResult(result);
-                    const accessToken = credential.accessToken;
-                    localStorage.setItem('github_token', accessToken);
-                    return result.user;
-                }
-                throw linkError;
-            }
-        }
-
-        // If no anonymous user, just do regular sign in
-        const result = await signInWithPopup(auth, githubProvider);
-        const credential = GithubAuthProvider.credentialFromResult(result);
-        const accessToken = credential.accessToken;
-        localStorage.setItem('github_token', accessToken);
-        console.log('Github sign in successful:', result.user.uid);
-        return result.user;
-    } catch (error) {
-        if (error.code === 'auth/credential-already-in-use') {
-            console.log('Account already exists, signing in with GitHub...');
-            const credential = GithubAuthProvider.credentialFromError(error);
-            if (credential) {
-                const result = await signInWithCredential(auth, credential);
-                return result.user;
-            }
-        }
-
-        console.error('Detailed GitHub sign in error:', {
-            code: error.code,
-            message: error.message,
-            email: error.customData?.email,
-            credential: error.credential
-        });
-        throw error;
-    }
-};
-
 export const signInAnonymouslyWithPersistence = async () => {
     try {
         if (!auth.currentUser) {
@@ -174,7 +108,6 @@ export const signInAnonymouslyWithPersistence = async () => {
     }
 };
 
-// Add logout helper function
 export const signOutUser = async () => {
     try {
         await signOut(auth);
@@ -262,3 +195,8 @@ console.log('SORQuizzes DB initialized with project:', firebaseConfig1.projectId
 
 // Export both databases and auth
 export { db1 as sorQuizzesDb, db2 as dashboardDb, auth, analytics };
+
+console.log('Firebase Auth Config:', {
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN
+});

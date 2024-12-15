@@ -222,6 +222,7 @@ import {
 import { collection, getDocs } from 'firebase/firestore';
 import { quizSets } from '../data/quizSets';
 import { quizEntries } from '../data/quiz-items';
+import { useAuthStore } from '../stores/auth';
 
 export default {
     name: 'Home',
@@ -241,7 +242,7 @@ export default {
             notification: {
                 show: false,
                 message: '',
-                type: 'success' // or 'error'
+                type: 'success'
             },
             activeTab: 'progress',
             quizEntriesList: [],
@@ -266,7 +267,8 @@ export default {
         }
     },
     mounted() {
-        this.loadUserProgress();
+        // Remove the immediate data loading
+        // this.loadUserProgress();
     },
     methods: {
         async loadUserProgress() {
@@ -452,6 +454,22 @@ export default {
 
             const differences = this.compareEntries(entry, original);
             return Object.keys(differences).length > 0;
+        }
+    },
+    setup() {
+        const authStore = useAuthStore();
+        return { authStore };
+    },
+    watch: {
+        'authStore.user'(newUser) {
+            if (newUser) {
+                // Only load data when user is authenticated
+                this.loadUserProgress();
+            } else {
+                // Clear data when user is not authenticated
+                this.userProgressList = [];
+                this.error = null;
+            }
         }
     }
 }

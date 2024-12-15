@@ -1,18 +1,12 @@
 <template>
   <div id="app">
-    <Home v-if="$route.path === '/'" />
-    <router-view v-else></router-view>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import Home from './components/Home.vue'
-
 export default {
-  name: 'App',
-  components: {
-    Home
-  }
+  name: 'App'
 }
 </script>
 
