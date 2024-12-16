@@ -266,7 +266,22 @@ export default {
         }
     },
     mounted() {
-        this.loadUserProgress();
+        // Remove automatic data loading
+        // We'll load data after confirming auth
+    },
+    async created() {
+        const authStore = useAuthStore();
+
+        // Wait for auth to be ready
+        if (!authStore.user) {
+            console.log('[Home] No authenticated user, redirecting to login');
+            this.$router.push('/login');
+            return;
+        }
+
+        // Only load data if we have an authenticated user
+        console.log('[Home] User authenticated, loading data...');
+        await this.loadUserProgress();
     },
     methods: {
         async loadUserProgress() {

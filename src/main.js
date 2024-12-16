@@ -132,12 +132,19 @@ authStore.initializeAuthListener();
 authStore.signInAnonymously().catch(console.error);
 
 // Add navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
     const publicPages = ['/login'];
     const authRequired = !publicPages.includes(to.path);
 
+    // Wait for auth to be ready
+    if (!authStore.isAuthReady) {
+        console.log('[Router] Waiting for auth to initialize...');
+        await authStore.initializeAuthListener();
+    }
+
     if (authRequired && !authStore.user) {
+        console.log('[Router] Auth required, redirecting to login');
         next('/login');
     } else {
         next();
