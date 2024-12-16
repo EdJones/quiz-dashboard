@@ -222,6 +222,7 @@ import {
 import { collection, getDocs } from 'firebase/firestore';
 import { quizSets } from '../data/quizSets';
 import { quizEntries } from '../data/quiz-items';
+import { useAuthStore } from '../stores/auth';
 
 export default {
     name: 'Home',
@@ -387,9 +388,10 @@ export default {
 
         async handleLogout() {
             try {
-                await signOutUser();
+                const authStore = useAuthStore();
+                await authStore.signOut();
                 this.showNotification('Successfully logged out', 'success');
-                // Router will handle redirect based on auth state
+                this.$router.push('/login');
             } catch (error) {
                 console.error('Logout error:', error);
                 this.showNotification('Error logging out: ' + error.message, 'error');

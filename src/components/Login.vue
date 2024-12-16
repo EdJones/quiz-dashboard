@@ -8,9 +8,6 @@
             <button class="button-75 github-btn" @click="handleGithubSignIn">
                 <font-awesome-icon :icon="['fab', 'github']" /> Sign in with GitHub
             </button>
-            <button class="button-75 anonymous-btn" @click="handleAnonymousSignIn">
-                Continue as Guest
-            </button>
         </div>
         <div v-if="error" class="error-message">
             {{ error }}
@@ -19,10 +16,9 @@
 </template>
 
 <script>
-import { useAuthStore } from '../main';
+import { useAuthStore } from '../stores/auth';
 
 export default {
-    name: 'Login',
     data() {
         return {
             error: null
@@ -42,15 +38,6 @@ export default {
             try {
                 const authStore = useAuthStore();
                 await authStore.signInWithGithub();
-                this.$router.push('/');
-            } catch (error) {
-                this.error = error.message;
-            }
-        },
-        async handleAnonymousSignIn() {
-            try {
-                const authStore = useAuthStore();
-                await authStore.signInAnonymously();
                 this.$router.push('/');
             } catch (error) {
                 this.error = error.message;

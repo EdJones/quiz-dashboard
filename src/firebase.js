@@ -17,7 +17,6 @@ import {
     signInWithPopup,
     GoogleAuthProvider,
     GithubAuthProvider,
-    signInAnonymously,
     setPersistence,
     browserLocalPersistence,
     signOut,
@@ -158,7 +157,7 @@ export const signInWithGithub = async () => {
         throw error;
     }
 };
-
+/*
 export const signInAnonymouslyWithPersistence = async () => {
     try {
         if (!auth.currentUser) {
@@ -173,7 +172,7 @@ export const signInAnonymouslyWithPersistence = async () => {
         throw error;
     }
 };
-
+*/
 // Add logout helper function
 export const signOutUser = async () => {
     try {
