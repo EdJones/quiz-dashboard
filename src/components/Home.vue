@@ -242,7 +242,7 @@ export default {
             notification: {
                 show: false,
                 message: '',
-                type: 'success'
+                type: 'success' // or 'error'
             },
             activeTab: 'progress',
             quizEntriesList: [],
@@ -267,8 +267,22 @@ export default {
         }
     },
     mounted() {
-        // Remove the immediate data loading
-        // this.loadUserProgress();
+        // Remove automatic data loading
+        // We'll load data after confirming auth
+    },
+    async created() {
+        const authStore = useAuthStore();
+
+        // Wait for auth to be ready
+        if (!authStore.user) {
+            console.log('[Home] No authenticated user, redirecting to login');
+            this.$router.push('/login');
+            return;
+        }
+
+        // Only load data if we have an authenticated user
+        console.log('[Home] User authenticated, loading data...');
+        await this.loadUserProgress();
     },
     methods: {
         async loadUserProgress() {
@@ -374,9 +388,10 @@ export default {
 
         async handleLogout() {
             try {
-                await signOutUser();
+                const authStore = useAuthStore();
+                await authStore.signOut();
                 this.showNotification('Successfully logged out', 'success');
-                // Router will handle redirect based on auth state
+                this.$router.push('/login');
             } catch (error) {
                 console.error('Logout error:', error);
                 this.showNotification('Error logging out: ' + error.message, 'error');
@@ -454,22 +469,6 @@ export default {
 
             const differences = this.compareEntries(entry, original);
             return Object.keys(differences).length > 0;
-        }
-    },
-    setup() {
-        const authStore = useAuthStore();
-        return { authStore };
-    },
-    watch: {
-        'authStore.user'(newUser) {
-            if (newUser) {
-                // Only load data when user is authenticated
-                this.loadUserProgress();
-            } else {
-                // Clear data when user is not authenticated
-                this.userProgressList = [];
-                this.error = null;
-            }
         }
     }
 }

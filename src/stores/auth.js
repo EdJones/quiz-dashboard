@@ -1,10 +1,9 @@
-import { defineStore } from 'pinia'
-import { auth } from '../firebase'
+import { defineStore } from 'pinia';
+import { auth } from '../firebase';
 import {
-    signInWithRedirect,
-    getRedirectResult,
-    GoogleAuthProvider,
     GithubAuthProvider,
+    GoogleAuthProvider,
+    signInWithPopup,
     setPersistence,
     browserLocalPersistence,
     signOut
@@ -14,15 +13,13 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
         error: null,
-        isAuthRedirecting: false,
-        lastRedirectError: null,
         isAuthReady: false
     }),
+
     actions: {
         async initializeAuthListener() {
             console.log('[Auth] Initializing auth listener');
 
-            // Set persistence to LOCAL
             try {
                 await setPersistence(auth, browserLocalPersistence);
                 console.log('[Auth] Firebase persistence enabled');
@@ -30,13 +27,10 @@ export const useAuthStore = defineStore('auth', {
                 console.error('[Auth] Error setting persistence:', error);
             }
 
-            // Return a promise that resolves when initial auth state is determined
             return new Promise((resolve) => {
                 auth.onAuthStateChanged((user) => {
                     console.log('[Auth] State changed:', {
-                        user: user ? user.uid : 'No user',
-                        pendingAuth: localStorage.getItem('authRedirectPending'),
-                        redirectTime: localStorage.getItem('authRedirectTime')
+                        user: user ? user.uid : 'No user'
                     });
                     this.user = user;
                     if (!this.isAuthReady) {
@@ -49,109 +43,36 @@ export const useAuthStore = defineStore('auth', {
 
         async signInWithGithub() {
             try {
-                // Clear any previous state
-                localStorage.removeItem('authRedirectPending');
-                localStorage.removeItem('authRedirectTime');
-                this.error = null;
-                this.lastRedirectError = null;
-                this.isAuthRedirecting = false;
-
-                console.log('[Auth] Starting GitHub sign-in redirect flow');
-
+                console.log('[Auth] Starting GitHub sign-in');
                 const provider = new GithubAuthProvider();
                 provider.addScope('user:email');
-                provider.addScope('repo'); // Add repo scope for creating issues
+                provider.addScope('repo');
 
-                // Get the Firebase app instance
-                const app = auth.app;
+                const result = await signInWithPopup(auth, provider);
+                const credential = GithubAuthProvider.credentialFromResult(result);
+                const token = credential.accessToken;
+                localStorage.setItem('github_token', token);
 
-                // Log Firebase config and current URL
-                console.log('[Auth] Auth attempt:', {
-                    authDomain: app.options.authDomain,
-                    projectId: app.options.projectId,
-                    currentURL: window.location.href,
-                    isProduction: window.location.hostname === 'quiz-dashboard-alpha.vercel.app'
-                });
-
-                // Save state before redirect
-                localStorage.setItem('authRedirectPending', 'github');
-                localStorage.setItem('authRedirectTime', Date.now().toString());
-                console.log('[Auth] Starting GitHub auth redirect...');
-
-                // Let Firebase handle the redirect URI
-                await signInWithRedirect(auth, provider);
+                console.log('[Auth] GitHub sign-in successful');
+                return result.user;
             } catch (error) {
-                console.error('[Auth] Error initiating GitHub redirect:', {
-                    code: error.code,
-                    message: error.message,
-                    currentURL: window.location.href
-                });
+                console.error('[Auth] Error in GitHub sign-in:', error);
                 this.error = error.message;
-                this.lastRedirectError = error;
-                this.isAuthRedirecting = false;
-                localStorage.removeItem('authRedirectPending');
-                localStorage.removeItem('authRedirectTime');
                 throw error;
             }
         },
 
-        async handleRedirectResult() {
-            const pendingAuth = localStorage.getItem('authRedirectPending');
-            const redirectTime = localStorage.getItem('authRedirectTime');
-            const MAX_REDIRECT_AGE = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-            // Clear any stale state immediately
-            if (!redirectTime || Date.now() - parseInt(redirectTime) > MAX_REDIRECT_AGE) {
-                console.log('[Auth] Clearing stale or invalid redirect state');
-                localStorage.removeItem('authRedirectPending');
-                localStorage.removeItem('authRedirectTime');
-                this.isAuthRedirecting = false;
-                return null;
-            }
-
+        async signInWithGoogle() {
             try {
-                console.log('[Auth] Checking redirect result:', {
-                    pendingAuth,
-                    redirectTime,
-                    timeSinceRedirect: redirectTime ? `${(Date.now() - parseInt(redirectTime)) / 1000}s` : 'N/A',
-                    currentURL: window.location.href
-                });
-
-                const result = await getRedirectResult(auth);
-
-                // Clear state after getting result
-                localStorage.removeItem('authRedirectPending');
-                localStorage.removeItem('authRedirectTime');
-
-                if (result) {
-                    console.log('[Auth] Successfully authenticated:', result.user.email);
-
-                    // Store GitHub token if available
-                    const credential = GithubAuthProvider.credentialFromResult(result);
-                    if (credential?.accessToken) {
-                        localStorage.setItem('github_token', credential.accessToken);
-                    }
-
-                    this.user = result.user;
-                    this.isAuthRedirecting = false;
-                    return result.user;
-                } else {
-                    console.log('[Auth] No redirect result');
-                    this.isAuthRedirecting = false;
-                    return null;
-                }
+                console.log('[Auth] Starting Google sign-in');
+                const provider = new GoogleAuthProvider();
+                provider.addScope('email');
+                const result = await signInWithPopup(auth, provider);
+                console.log('[Auth] Google sign-in successful');
+                return result.user;
             } catch (error) {
-                console.error('[Auth] Error handling redirect:', {
-                    code: error.code,
-                    message: error.message,
-                    pendingAuth,
-                    redirectTime
-                });
+                console.error('[Auth] Error in Google sign-in:', error);
                 this.error = error.message;
-                this.lastRedirectError = error;
-                this.isAuthRedirecting = false;
-                localStorage.removeItem('authRedirectPending');
-                localStorage.removeItem('authRedirectTime');
                 throw error;
             }
         },
@@ -168,4 +89,4 @@ export const useAuthStore = defineStore('auth', {
             }
         }
     }
-}); 
+});

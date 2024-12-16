@@ -1,67 +1,38 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import './style.css'
 import App from './App.vue'
 import router from './router'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faCircleQuestion } from '@fortawesome/free-regular-svg-icons'
-import { faCircleMinus } from '@fortawesome/free-solid-svg-icons'
-import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
-import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
-import { faFlaskVial } from '@fortawesome/free-solid-svg-icons'
-import { faPodcast } from '@fortawesome/free-solid-svg-icons'
-import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
-import { faBook } from '@fortawesome/free-solid-svg-icons'
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import {
+    faUserSecret, faCircleQuestion, faCircleMinus,
+    faCircleXmark, faCircleCheck, faCheck, faFlaskVial,
+    faPodcast, faExternalLinkAlt, faBook
+} from '@fortawesome/free-solid-svg-icons'
+import {
+    faGoogle, faGithub
+} from '@fortawesome/free-brands-svg-icons'
 
-import { inject } from '@vercel/analytics';
-
-// Initialize Vercel Analytics only in production
-if (import.meta.env.PROD) {
-    inject({
-        mode: 'production',
-        debug: false,
-    });
-}
-
-import Vue3Lottie from 'vue3-lottie'
-import LiteYouTubeEmbed from 'vue-lite-youtube-embed';
-import 'vue-lite-youtube-embed/style.css'
-
-library.add(faUserSecret)
-library.add(faCircleQuestion)
-library.add(faCircleMinus)
-library.add(faCircleXmark)
-library.add(faCircleCheck)
-library.add(faCheck)
-library.add(faFlaskVial)
-library.add(faPodcast)
-library.add(faExternalLinkAlt)
-library.add(faBook)
-library.add(faGoogle)
-library.add(faGithub)
-
+// Create app instance
 const app = createApp(App)
+
+// Create and use Pinia before any store usage
 const pinia = createPinia()
-
-app.config.globalProperties.$userAnswers = []
-app.use(Vue3Lottie)
 app.use(pinia)
-app.use(router)
-app.component('font-awesome-icon', FontAwesomeIcon)
-app.component(LiteYouTubeEmbed)
 
-// Initialize auth store
+// Import auth store after Pinia is installed
 import { useAuthStore } from './stores/auth'
-const authStore = useAuthStore()
 
-// Wait for auth to be ready before mounting
-authStore.initializeAuthListener().then(() => {
-    app.mount('#app')
-}).catch(error => {
-    console.error('[Main] Error initializing auth:', error)
-})
+// Use router
+app.use(router)
+
+// Configure FontAwesome
+app.component('font-awesome-icon', FontAwesomeIcon)
+library.add(
+    faUserSecret, faCircleQuestion, faCircleMinus,
+    faCircleXmark, faCircleCheck, faCheck, faFlaskVial,
+    faPodcast, faExternalLinkAlt, faBook, faGoogle, faGithub
+)
+
+// Mount the app
+app.mount('#app')

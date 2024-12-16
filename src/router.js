@@ -16,48 +16,40 @@ const router = createRouter({
             component: () => import('./components/Login.vue')
         },
         {
-            path: '/__/auth/handler',
-            name: 'auth-handler',
-            component: () => import('./components/AuthHandler.vue')
+            path: '/create-issue',
+            name: 'create-issue',
+            component: () => import('./components/CreateIssue.vue'),
+            meta: { requiresAuth: true }
         }
     ]
 })
 
-// Initialize auth store
-const authStore = useAuthStore()
-
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
-    // Wait for auth to be ready before first navigation
-    if (!authStore.isAuthReady) {
-        console.log('[Router] Waiting for auth to initialize...');
-        await authStore.initializeAuthListener();
-    }
+    try {
+        const authStore = useAuthStore();
+        console.log('[Router] Auth store:', authStore);
 
-    // Handle auth redirects
-    if (to.path.startsWith('/__/auth')) {
-        console.log('[Router] Handling auth callback');
-        try {
-            await authStore.handleRedirectResult();
-            next('/');
-        } catch (error) {
-            console.error('[Router] Auth redirect error:', error);
-            next('/login');
+        // Wait for auth to be ready
+        if (!authStore.isAuthReady) {
+            console.log('[Router] Waiting for auth to initialize...');
+            await authStore.initializeAuthListener();
         }
-        return;
-    }
 
-    // Check if route requires auth
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        // Check if user is logged in
-        if (!authStore.user) {
-            console.log('[Router] Unauthenticated user attempting to access:', to.path);
+        // Check if route requires auth
+        const publicPages = ['/login'];
+        const authRequired = !publicPages.includes(to.path);
+
+        if (authRequired && !authStore.user) {
+            console.log('[Router] Auth required, redirecting to login');
             next('/login');
-            return;
+        } else {
+            next();
         }
+    } catch (error) {
+        console.error('[Router] Navigation error:', error);
+        next('/login');
     }
-
-    next();
-})
+});
 
 export default router 
