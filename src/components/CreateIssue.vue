@@ -8,9 +8,7 @@
 
         <!-- Header Controls -->
         <div class="header-controls">
-            <button @click="toggleForm" class="button-75">
-                {{ showForm ? 'Hide Form' : 'Create New Issue' }}
-            </button>
+
             <a :href="repoUrl" target="_blank" class="button-75">Go to Repository</a>
         </div>
 
@@ -18,7 +16,12 @@
 
         <!-- Create Issue Form -->
         <div v-if="showForm">
-            <h2>Create GitHub Issue</h2>
+            <div class="form-header">
+                <h2>Create GitHub Issue</h2>
+                <button @click="toggleForm" class="button-75">
+                    {{ showForm ? 'Hide Form' : 'Create New Issue' }}
+                </button>
+            </div>
             <form @submit.prevent="submitIssue" class="issue-form">
                 <div class="form-group">
                     <label for="title">Title:</label>
@@ -62,7 +65,7 @@
                 </button>
             </div>
             <button @click="toggleForm" class="button-75">
-                {{ showForm ? 'Hide Form' : 'Create New Issue' }}
+                {{ showForm ? 'Hide New Issue Form' : 'Create New Issue' }}
             </button>
         </div>
         <div class="recent-issues">
@@ -410,6 +413,7 @@ button {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    justify-content: flex-end;
 }
 
 .title-and-labels {
@@ -463,5 +467,16 @@ button {
 .issue-meta {
     color: var(--text-secondary);
     font-size: 0.875rem;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-header h2 {
+    margin: 0;
 }
 </style>
