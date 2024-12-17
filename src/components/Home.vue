@@ -9,7 +9,6 @@
         <div class="header-controls">
             <h1>Dashboard -- SORQuizzes</h1>
             <div class="header-buttons">
-                <router-link to="/create-issue" class="button-75">Create Issue</router-link>
                 <button @click="handleLogout" class="button-75">Logout</button>
             </div>
         </div>
@@ -33,6 +32,8 @@
             <button class="tab-button" :class="{ active: activeTab === 'entries' }" @click="activeTab = 'entries'">
                 Quiz Entries
             </button>
+            <router-link to="/create-issue" class="button-75">Issues</router-link>
+
         </div>
 
         <!-- User Progress Tab -->

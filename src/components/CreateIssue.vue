@@ -49,14 +49,20 @@
         <h2>Issues</h2>
         <!-- State Filter -->
         <div class="state-filter">
-            <button @click="filterState = 'all'" :class="['filter-button', { active: filterState === 'all' }]">
-                All Issues
-            </button>
-            <button @click="filterState = 'open'" :class="['filter-button', { active: filterState === 'open' }]">
-                Open
-            </button>
-            <button @click="filterState = 'closed'" :class="['filter-button', { active: filterState === 'closed' }]">
-                Closed
+            <div class="filter-buttons">
+                <button @click="filterState = 'all'" :class="['filter-button', { active: filterState === 'all' }]">
+                    All Issues
+                </button>
+                <button @click="filterState = 'open'" :class="['filter-button', { active: filterState === 'open' }]">
+                    Open
+                </button>
+                <button @click="filterState = 'closed'"
+                    :class="['filter-button', { active: filterState === 'closed' }]">
+                    Closed
+                </button>
+            </div>
+            <button @click="toggleForm" class="button-75">
+                {{ showForm ? 'Hide Form' : 'Create New Issue' }}
             </button>
         </div>
         <div class="recent-issues">
@@ -112,7 +118,7 @@ export default {
             },
             issues: [],
             loading: false,
-            showForm: true,
+            showForm: false,
             filterState: 'open'
         }
     },
@@ -415,8 +421,14 @@ button {
 
 .state-filter {
     display: flex;
-    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 1.5rem;
 }
 
 .filter-button {
