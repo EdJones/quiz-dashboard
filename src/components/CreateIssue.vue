@@ -324,7 +324,7 @@ button {
 }
 
 .issue-item {
-    padding: 1rem;
+    padding: .1rem;
     border: 1px solid #d0d7de;
     border-radius: 4px;
     margin-bottom: 1rem;
@@ -416,7 +416,7 @@ button {
 }
 
 .issue-body-preview {
-    margin: 0.75rem 0;
+    margin: 0 rem 0;
     color: var(--text-secondary);
     font-size: 0.9em;
     white-space: pre-line;
