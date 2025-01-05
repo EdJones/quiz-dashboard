@@ -63,6 +63,11 @@
                             <div class="quiz-title">
                                 {{ getQuizTitle(progress.quizId) }}
                             </div>
+
+                            <!-- Add feedback display -->
+                            <div class="detail-row feedback-section" v-if="progress.feedback">
+                                <strong>Feedback:</strong> {{ progress.feedback }}
+                            </div>
                         </div>
 
                         <div class="detail-row" v-if="progress.incorrectQuestions?.length">
@@ -923,5 +928,10 @@ h1 {
     margin-left: -0.5rem;
     /* Compensate for padding */
     margin-right: -0.5rem;
+}
+
+.feedback-section {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
 }
 </style>
