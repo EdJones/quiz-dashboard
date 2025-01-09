@@ -26,6 +26,9 @@
 
         <!-- Tab Navigation -->
         <div class="tab-container">
+            <button class="tab-button" :class="{ active: activeTab === 'summary' }" @click="activeTab = 'summary'">
+                Summary
+            </button>
             <button class="tab-button" :class="{ active: activeTab === 'progress' }" @click="activeTab = 'progress'">
                 User Progress
             </button>
@@ -36,8 +39,9 @@
 
         </div>
 
-        <!-- User Progress Tab -->
+        <Summary v-if="activeTab === 'summary'" />
         <UserProgress v-if="activeTab === 'progress'" />
+        <QuizEntries v-if="activeTab === 'entries'" />
 
         <!-- Dashboard Data Section -->
         <div class="dashboard-data">
@@ -50,9 +54,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Quiz Entries Tab -->
-    <QuizEntries v-if="activeTab === 'entries'" />
 </template>
 
 <script>
@@ -71,12 +72,14 @@ import { quizEntries } from '../data/quiz-items';
 import { useAuthStore } from '../stores/auth';
 import QuizEntries from './QuizEntries.vue';
 import UserProgress from './UserProgress.vue';
+import Summary from './Summary.vue';
 
 export default {
     name: 'Home',
     components: {
         QuizEntries,
-        UserProgress
+        UserProgress,
+        Summary
     },
     data() {
         return {
@@ -88,7 +91,7 @@ export default {
                 message: '',
                 type: 'success'
             },
-            activeTab: 'progress'
+            activeTab: 'summary'
         }
     },
     methods: {
