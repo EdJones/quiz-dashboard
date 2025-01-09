@@ -19,6 +19,11 @@
                 <div class="stat-value">{{ summaryData.totalCorrect }}</div>
                 <div class="stat-label">Total Correct ({{ summaryData.correctPercentage }}%)</div>
             </div>
+            <div class="summary-card">
+                <h4>Incorrect Answers</h4>
+                <div class="stat-value">{{ summaryData.totalIncorrect }}</div>
+                <div class="stat-label">Total Incorrect ({{ summaryData.incorrectPercentage }}%)</div>
+            </div>
         </div>
         <div v-else-if="error" class="error">
             {{ error }}
@@ -53,12 +58,17 @@ export default {
                 const correctPercentage = totalQuestions > 0
                     ? Math.round((totalCorrect / totalQuestions) * 100)
                     : 0;
+                const incorrectPercentage = totalQuestions > 0
+                    ? Math.round((totalIncorrect / totalQuestions) * 100)
+                    : 0;
 
                 this.summaryData = {
                     totalProgress: progress.length,
                     totalQuestions: totalQuestions,
                     totalCorrect: totalCorrect,
-                    correctPercentage: correctPercentage
+                    totalIncorrect: totalIncorrect,
+                    correctPercentage: correctPercentage,
+                    incorrectPercentage: incorrectPercentage
                 };
             } catch (error) {
                 console.error('Error loading summary:', error);
