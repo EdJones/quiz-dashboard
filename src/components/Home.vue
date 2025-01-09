@@ -109,7 +109,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(answer, index) in progress.userAnswers" :key="index">
+                                    <tr v-for="(answer, index) in progress.userAnswers" :key="index"
+                                        :class="{ 'incorrect-answer': isAnswerIncorrect(answer.questionId, answer.selected) }">
                                         <td>{{ answer.questionId || 'N/A' }}</td>
                                         <td>{{ answer.questionTitle || 'N/A' }} <br>
                                             {{ getQuestionFromQuizEntries(answer.questionId) || 'N/A' }}</td>
@@ -513,6 +514,11 @@ export default {
             if (!questionId) return null;
             const quizItem = quizEntries.find(item => item.id === questionId);
             return quizItem?.Question || null;
+        },
+        isAnswerIncorrect(questionId, selectedAnswer) {
+            if (!questionId || !selectedAnswer) return false;
+            const quizItem = quizEntries.find(item => item.id === questionId);
+            return quizItem && parseInt(quizItem.correctAnswer) !== parseInt(selectedAnswer);
         }
     }
 }
@@ -1059,5 +1065,10 @@ h1 {
 .incorrect-section strong {
     text-align: left;
     margin-bottom: 0.25rem;
+}
+
+.incorrect-answer {
+    background-color: rgba(104, 68, 68, 0.1) !important;
+    color: #bc202f;
 }
 </style>
