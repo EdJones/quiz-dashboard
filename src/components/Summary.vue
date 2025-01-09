@@ -5,9 +5,14 @@
 
         <div v-if="summaryData" class="summary-content">
             <div class="summary-card">
-                <h4>User Progress</h4>
+                <h4>Quiz Attempts</h4>
                 <div class="stat-value">{{ summaryData.totalProgress }}</div>
                 <div class="stat-label">Total Attempts</div>
+            </div>
+            <div class="summary-card">
+                <h4>Questions Answered</h4>
+                <div class="stat-value">{{ summaryData.totalQuestions }}</div>
+                <div class="stat-label">Total Questions</div>
             </div>
         </div>
         <div v-else-if="error" class="error">
@@ -35,8 +40,12 @@ export default {
             try {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
+                const totalQuestions = progress.reduce((sum, attempt) =>
+                    sum + (attempt.userAnswers?.length || 0), 0);
+
                 this.summaryData = {
-                    totalProgress: progress.length
+                    totalProgress: progress.length,
+                    totalQuestions: totalQuestions
                 };
             } catch (error) {
                 console.error('Error loading summary:', error);
