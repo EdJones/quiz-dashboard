@@ -4,8 +4,11 @@
         <button class="button-75" @click="loadSummary">Load Summary</button>
 
         <div v-if="summaryData" class="summary-content">
-            <!-- Summary content will go here -->
-            <p>Summary data loaded</p>
+            <div class="summary-card">
+                <h4>User Progress</h4>
+                <div class="stat-value">{{ summaryData.totalProgress }}</div>
+                <div class="stat-label">Total Attempts</div>
+            </div>
         </div>
         <div v-else-if="error" class="error">
             {{ error }}
@@ -17,6 +20,8 @@
 </template>
 
 <script>
+import { getUserProgress } from '../firebase';
+
 export default {
     name: 'Summary',
     data() {
@@ -29,7 +34,10 @@ export default {
         async loadSummary() {
             try {
                 console.log('Loading summary data...');
-                // Add summary loading logic here
+                const progress = await getUserProgress();
+                this.summaryData = {
+                    totalProgress: progress.length
+                };
             } catch (error) {
                 console.error('Error loading summary:', error);
                 this.error = error.message;
@@ -46,6 +54,36 @@ export default {
 
 .summary-content {
     margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-width: 200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card h4 {
+    margin: 0 0 1rem 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 /* Button Styling */
@@ -61,6 +99,7 @@ export default {
     font-weight: 500;
     text-decoration: none;
     display: inline-block;
+    margin-bottom: 1rem;
 }
 
 .button-75:hover {
