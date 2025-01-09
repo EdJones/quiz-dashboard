@@ -304,7 +304,9 @@ export default {
                 console.log('User progress loaded:', progress.length);
 
                 // Combine the data
-                this.userProgressList = [...attempts, ...progress];
+                //this.userProgressList = [...attempts, ...progress];
+                this.userProgressList = [...progress];
+
 
             } catch (error) {
                 console.error('Error loading data:', error);
