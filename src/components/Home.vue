@@ -134,93 +134,7 @@
     </div>
 
     <!-- Quiz Entries Tab -->
-    <div v-if="activeTab === 'entries'" class="quiz-entries">
-        <h3>Quiz Entries</h3>
-        <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
-
-        <div v-if="quizEntriesList.length" class="entries-list">
-            <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
-                <div class="entry-header">
-                    <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{
-                        entry.originalId }}</strong></h4>
-                    <h4 v-else>Suggested New Quiz Entry</h4>
-                    <span>ID: {{ entry.id }}</span>
-                    <span>Quiz ID: {{ entry.quizId }}</span>
-                    <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
-                </div>
-                <div class="entry-details">
-                    <div class="detail-row">
-                        <strong>Title:</strong> {{ entry.title }}
-                    </div>
-                    <div class="detail-row">
-                        <strong>Question:</strong> {{ getQuestionText(entry) }}
-                    </div>
-                    <div class="detail-row" v-if="entry.questionP2">
-                        <strong>Question Part 2:</strong> {{ entry.questionP2 }}
-                    </div>
-                    <div class="detail-row">
-                        <strong>Answer Type:</strong> {{ entry.answer_type }}
-                    </div>
-                    <div class="detail-row" v-if="entry.subtitle">
-                        <strong>Subtitle:</strong> {{ entry.subtitle }}
-                    </div>
-                    <div class="detail-row">
-                        <strong>Options:</strong>
-                        <ul v-if="hasOptions(entry)">
-                            <li v-if="entry.option1" :class="{ 'correct-option': 1 === parseInt(entry.correctAnswer) }">
-                                1. {{ entry.option1 }}
-                            </li>
-                            <li v-if="entry.option2" :class="{ 'correct-option': 2 === parseInt(entry.correctAnswer) }">
-                                2. {{ entry.option2 }}
-                            </li>
-                            <li v-if="entry.option3" :class="{ 'correct-option': 3 === parseInt(entry.correctAnswer) }">
-                                3. {{ entry.option3 }}
-                            </li>
-                            <li v-if="entry.option4" :class="{ 'correct-option': 4 === parseInt(entry.correctAnswer) }">
-                                4. {{ entry.option4 }}
-                            </li>
-                            <li v-if="entry.option5" :class="{ 'correct-option': 5 === parseInt(entry.correctAnswer) }">
-                                5. {{ entry.option5 }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="detail-row">
-                        <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
-                    </div>
-
-                    <template v-if="entry.originalId">
-                        <div class="comparison-header" v-if="hasDifferences(entry)">
-                            <h4>Changes from Original:</h4>
-                        </div>
-
-                        <template
-                            v-for="(field, fieldName) in compareEntries(entry, getOriginalEntry(entry.originalId))"
-                            :key="fieldName">
-                            <div class="detail-row difference">
-                                <strong>{{ fieldName }}:</strong>
-                                <div class="diff-view">
-                                    <div class="original">
-                                        <span class="diff-label">Original:</span>
-                                        <span class="diff-content">{{ field.original || 'empty' }}</span>
-                                    </div>
-                                    <div class="draft">
-                                        <span class="diff-label">Draft:</span>
-                                        <span class="diff-content">{{ field.draft || 'empty' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </template>
-                </div>
-            </div>
-        </div>
-        <div v-else-if="entriesError" class="error">
-            {{ entriesError }}
-        </div>
-        <div v-else>
-            No quiz entries found
-        </div>
-    </div>
+    <QuizEntries v-if="activeTab === 'entries'" />
 
     <!-- Dashboard Data Section -->
     <div class="dashboard-data">
@@ -248,9 +162,13 @@ import { collection, getDocs } from 'firebase/firestore';
 import { quizSets } from '../data/quizSets';
 import { quizEntries } from '../data/quiz-items';
 import { useAuthStore } from '../stores/auth';
+import QuizEntries from './QuizEntries.vue';
 
 export default {
     name: 'Home',
+    components: {
+        QuizEntries
+    },
     data() {
         return {
             userProgressList: [],
@@ -267,12 +185,9 @@ export default {
             notification: {
                 show: false,
                 message: '',
-                type: 'success' // or 'error'
+                type: 'success'
             },
-            activeTab: 'progress',
-            quizEntriesList: [],
-            entriesError: null,
-            db: sorQuizzesDb
+            activeTab: 'progress'
         }
     },
     computed: {
