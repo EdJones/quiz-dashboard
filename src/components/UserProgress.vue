@@ -21,29 +21,6 @@
                         <strong>Feedback:</strong> {{ progress.feedback }}
                     </div>
 
-                    <!-- Incorrect Questions section -->
-                    <div class="detail-row" v-if="progress.incorrectQuestions?.length">
-                        <div class="incorrect-section">
-                            <strong>Incorrect Questions:</strong>
-                            <table class="incorrect-table">
-                                <thead>
-                                    <tr>
-                                        <th>QuizItem</th>
-                                        <th>Question</th>
-                                        <th>Answer Chosen</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                        <td>{{ q.id || 'N/A' }}</td>
-                                        <td>{{ q.title || 'N/A' }}</td>
-                                        <td>{{ q.chosenAnswer || 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
                     <!-- Answers section -->
                     <div class="detail-row2">
                         <div class="answers-header" @click="toggleAnswers(progress.id)">
