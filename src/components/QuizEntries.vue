@@ -174,23 +174,178 @@ export default {
 </script>
 
 <style scoped>
-/* Copy all the relevant CSS from Home.vue */
 .quiz-entries {
     margin-top: 1rem;
 }
 
 .entries-list {
+    margin-top: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
 .entry-item {
-    padding: 1rem;
-    border: 1px solid #d0d7de;
-    border-radius: 4px;
-    background-color: var(--bg-primary);
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    background-color: var(--item-bg-color, #f9f9f9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* ... Add all other relevant CSS from Home.vue ... */
+.entry-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.entry-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.entry-header span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.entry-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-row strong {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-row ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    list-style: none;
+}
+
+.detail-row li {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem;
+}
+
+.correct-option {
+    background-color: rgba(127, 255, 212, 0.3);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Button Styling */
+.button-75 {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.button-75:hover {
+    background-color: var(--hover-bg);
+    transform: translateY(-1px);
+}
+
+.button-75:active {
+    transform: translateY(0);
+}
+
+/* Comparison Section */
+.comparison-header {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.difference {
+    background-color: var(--bg-secondary);
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.diff-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.original,
+.draft {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.25rem;
+}
+
+.diff-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-width: 70px;
+}
+
+.diff-content {
+    flex: 1;
+}
+
+.original .diff-content {
+    color: #cf222e;
+    text-decoration: line-through;
+}
+
+.draft .diff-content {
+    color: #116329;
+}
+
+/* Error State */
+.error {
+    color: #ff4444;
+    padding: 1rem;
+    border: 1px solid #ff4444;
+    border-radius: 4px;
+    margin: 1rem 0;
+    background-color: rgba(255, 68, 68, 0.1);
+}
+
+.timestamp {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+    .entry-header {
+        font-size: 0.9rem;
+    }
+
+    .button-75 {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-row {
+        font-size: 0.9rem;
+    }
+}
 </style>
