@@ -66,8 +66,8 @@
                                 <table class="incorrect-table">
                                     <thead>
                                         <tr>
+                                            <th>QuizItem</th>
                                             <th>Question</th>
-                                            <th>Answer</th>
                                             <th>Answer Chosen</th>
                                         </tr>
                                     </thead>
@@ -83,7 +83,7 @@
                         </div>
 
                         <!-- Answers section -->
-                        <div class="detail-row">
+                        <div class="detail-row2">
                             <div class="answers-header" @click="toggleAnswers(progress.id)">
                                 <div class="header-info">
                                     <strong>Answers</strong>
@@ -100,6 +100,25 @@
                                     Q{{ index + 1 }}: {{ answer }}
                                 </li>
                             </ul>
+                            <table class="incorrect-table">
+                                <thead>
+                                    <tr>
+                                        <th>QuizItem</th>
+                                        <th>Question</th>
+                                        <th>Answer Chosen</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(answer, index) in progress.userAnswers" :key="index">
+                                        <td>{{ answer.questionId || 'N/A' }}</td>
+                                        <td>{{ answer.questionTitle || 'N/A' }} <br>
+                                            {{ getQuestionFromQuizEntries(answer.questionId) || 'N/A' }}</td>
+                                        <td>{{ answer.selected || 'N/A' }}</td>
+                                        <td>{{ getAnswerText(answer.questionId, answer.selected) || 'N/A' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -360,6 +379,19 @@ export default {
             );
             return quiz ? quiz.setName : `Quiz ${quizId}`;
         },
+        getAnswerText(questionId, selectedNumber) {
+            console.log('getAnswerText', questionId, selectedNumber);
+            if (!questionId || !selectedNumber) return null;
+
+            const quizItem = quizEntries.find(item => item.id === questionId);
+            if (!quizItem) return null;
+
+            // Using option1, option2, etc. as the field names
+            const optionKey = `option${selectedNumber}`;
+            return quizItem[optionKey];
+        },
+
+
 
         async testDatabases() {
             this.testResults = 'Testing databases...\n';
@@ -476,6 +508,11 @@ export default {
 
             const differences = this.compareEntries(entry, original);
             return Object.keys(differences).length > 0;
+        },
+        getQuestionFromQuizEntries(questionId) {
+            if (!questionId) return null;
+            const quizItem = quizEntries.find(item => item.id === questionId);
+            return quizItem?.Question || null;
         }
     }
 }
@@ -578,7 +615,7 @@ button {
 
 .detail-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
 }
@@ -994,7 +1031,7 @@ h1 {
 
 .incorrect-table th,
 .incorrect-table td {
-    padding: 0.35rem 0.5rem;
+    padding: 0.35rem;
     text-align: left;
     border: 1px solid var(--border-color);
 }
