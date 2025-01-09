@@ -208,6 +208,11 @@ export default {
     color: var(--text-primary);
 }
 
+.entry-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
 .entry-header span {
     font-size: 0.9rem;
     color: var(--text-secondary);
@@ -228,6 +233,7 @@ export default {
 .detail-row strong {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    min-width: 100px;
 }
 
 .detail-row ul {
@@ -239,12 +245,29 @@ export default {
 .detail-row li {
     margin-bottom: 0.5rem;
     padding: 0.25rem;
+    position: relative;
+}
+
+.detail-row li:before {
+    content: "";
+    position: absolute;
+    left: -1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
 }
 
 .correct-option {
     background-color: rgba(127, 255, 212, 0.3);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
+}
+
+.correct-option:before {
+    background-color: #4caf50;
 }
 
 /* Button Styling */
@@ -260,6 +283,7 @@ export default {
     font-weight: 500;
     text-decoration: none;
     display: inline-block;
+    margin-bottom: 1rem;
 }
 
 .button-75:hover {
@@ -278,6 +302,12 @@ export default {
     border-top: 1px solid var(--border-color);
 }
 
+.comparison-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
 .difference {
     background-color: var(--bg-secondary);
     padding: 0.75rem;
@@ -290,6 +320,9 @@ export default {
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 0.5rem;
+    background-color: var(--bg-primary);
+    border-radius: 4px;
+    padding: 0.5rem;
 }
 
 .original,
@@ -304,19 +337,24 @@ export default {
     font-size: 0.85rem;
     color: var(--text-secondary);
     min-width: 70px;
+    font-weight: 500;
 }
 
 .diff-content {
     flex: 1;
+    padding: 0.25rem;
+    border-radius: 2px;
 }
 
 .original .diff-content {
     color: #cf222e;
     text-decoration: line-through;
+    background-color: rgba(255, 0, 0, 0.05);
 }
 
 .draft .diff-content {
     color: #116329;
+    background-color: rgba(0, 255, 0, 0.05);
 }
 
 /* Error State */
@@ -346,6 +384,14 @@ export default {
 
     .detail-row {
         font-size: 0.9rem;
+    }
+
+    .diff-view {
+        font-size: 0.9rem;
+    }
+
+    .diff-label {
+        min-width: 60px;
     }
 }
 </style>
