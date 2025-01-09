@@ -44,24 +44,21 @@
             <div v-if="userProgressList.length" class="progress-list">
                 <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
                     <div class="progress-header">
-                        <h4>Quiz Attempt Details</h4>
-                        <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span>
+                        <p class="progress-header-text"><span class="timestamp">{{ formatDate(progress.lastUpdated)
+                                }}</span><br>
+                            User {{ getUserDisplayName(progress.userId) }} <br>
+                            Quiz {{ progress.quizId }} - {{ getQuizTitle(progress.quizId) }} &nbsp;
+                            ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
+                            of {{ progress.userAnswers.length }} correct)<br>
+
+                        </p>
+
                     </div>
 
                     <div class="progress-details">
                         <div class="id-info">
                             <div>
-                                <strong>User ID:</strong> {{ getUserDisplayName(progress.userId) }}
-                            </div>
-                            <div>
-                                <strong>Quiz ID:</strong> {{ progress.quizId }}
-                                <span v-if="progress.userAnswers?.length" class="quiz-stats">
-                                    ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
-                                    of {{ progress.userAnswers.length }} correct)
-                                </span>
-                            </div>
-                            <div class="quiz-title">
-                                {{ getQuizTitle(progress.quizId) }}
+
                             </div>
 
                             <!-- Add feedback display -->
@@ -726,6 +723,11 @@ button {
         gap: 0.5rem;
     }
 
+    .progress-header-text {
+        font-size: x-small;
+        text-align: left;
+    }
+
     .button-75 {
         width: 100%;
         margin-bottom: 0.5rem;
@@ -974,5 +976,10 @@ h1 {
 .feedback-section {
     margin: 0.5rem 0;
     color: var(--text-secondary);
+}
+
+.progress-header-text {
+    text-align: left;
+    font-size: 0.9rem;
 }
 </style>
