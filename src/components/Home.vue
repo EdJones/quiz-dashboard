@@ -44,49 +44,45 @@
             <div v-if="userProgressList.length" class="progress-list">
                 <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
                     <div class="progress-header">
-                        <p class="progress-header-text"><span class="timestamp">{{ formatDate(progress.lastUpdated)
-                                }}</span><br>
-                            User {{ getUserDisplayName(progress.userId) }} <br>
-                            Quiz {{ progress.quizId }} - {{ getQuizTitle(progress.quizId) }} &nbsp;
-                            ({{ progress.userAnswers.length - progress.incorrectQuestions.length }}
-                            of {{ progress.userAnswers.length }} correct)<br>
-
+                        <p class="progress-header-text" style="text-align: left; font-size: 0.9rem;">
+                            <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span><br>
+                            User {{ getUserDisplayName(progress.userId) }}<br>
+                            Quiz {{ progress.quizId }} - {{ getQuizTitle(progress.quizId) }}<br>
+                            ({{ progress.userAnswers.length - progress.incorrectQuestions.length }} of {{
+                                progress.userAnswers.length }} correct)<br>
                         </p>
-
                     </div>
 
                     <div class="progress-details">
-                        <div class="id-info">
-                            <div>
-
-                            </div>
-
-                            <!-- Add feedback display -->
-                            <div class="detail-row feedback-section" v-if="progress.feedback">
-                                <strong>Feedback:</strong> {{ progress.feedback }}
-                            </div>
+                        <!-- Feedback section -->
+                        <div class="detail-row feedback-section" v-if="progress.feedback">
+                            <strong>Feedback:</strong> {{ progress.feedback }}
                         </div>
 
+                        <!-- Incorrect Questions section -->
                         <div class="detail-row" v-if="progress.incorrectQuestions?.length">
-                            <strong>Incorrect Questions:</strong>
-                            <table class="incorrect-table">
-                                <thead>
-                                    <tr>
-                                        <th>Question ID</th>
-                                        <th>Title</th>
-                                        <th>Chosen Answer</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                        <td>{{ q.id || 'N/A' }}</td>
-                                        <td>{{ q.title || 'N/A' }}</td>
-                                        <td>{{ q.chosenAnswer || 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="incorrect-section">
+                                <strong>Incorrect Questions:</strong>
+                                <table class="incorrect-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Question</th>
+                                            <th>Answer</th>
+                                            <th>Answer Chosen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(q, index) in progress.incorrectQuestions" :key="index">
+                                            <td>{{ q.id || 'N/A' }}</td>
+                                            <td>{{ q.title || 'N/A' }}</td>
+                                            <td>{{ q.chosenAnswer || 'N/A' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
+                        <!-- Answers section -->
                         <div class="detail-row">
                             <div class="answers-header" @click="toggleAnswers(progress.id)">
                                 <div class="header-info">
@@ -108,117 +104,112 @@
                     </div>
                 </div>
             </div>
-            <div v-else-if="error" class="error">
-                {{ error }}
-            </div>
-            <div v-else>
-                No user progress found
-            </div>
         </div>
+        <div v-else-if="error" class="error">
+            {{ error }}
+        </div>
+        <div v-else>
+            No user progress found
+        </div>
+    </div>
 
-        <!-- Quiz Entries Tab -->
-        <div v-if="activeTab === 'entries'" class="quiz-entries">
-            <h3>Quiz Entries</h3>
-            <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
+    <!-- Quiz Entries Tab -->
+    <div v-if="activeTab === 'entries'" class="quiz-entries">
+        <h3>Quiz Entries</h3>
+        <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
 
-            <div v-if="quizEntriesList.length" class="entries-list">
-                <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
-                    <div class="entry-header">
-                        <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{
-                            entry.originalId }}</strong></h4>
-                        <h4 v-else>Suggested New Quiz Entry</h4>
-                        <span>ID: {{ entry.id }}</span>
-                        <span>Quiz ID: {{ entry.quizId }}</span>
-                        <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+        <div v-if="quizEntriesList.length" class="entries-list">
+            <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
+                <div class="entry-header">
+                    <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{
+                        entry.originalId }}</strong></h4>
+                    <h4 v-else>Suggested New Quiz Entry</h4>
+                    <span>ID: {{ entry.id }}</span>
+                    <span>Quiz ID: {{ entry.quizId }}</span>
+                    <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+                </div>
+                <div class="entry-details">
+                    <div class="detail-row">
+                        <strong>Title:</strong> {{ entry.title }}
                     </div>
-                    <div class="entry-details">
-                        <div class="detail-row">
-                            <strong>Title:</strong> {{ entry.title }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Question:</strong> {{ getQuestionText(entry) }}
-                        </div>
-                        <div class="detail-row" v-if="entry.questionP2">
-                            <strong>Question Part 2:</strong> {{ entry.questionP2 }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Answer Type:</strong> {{ entry.answer_type }}
-                        </div>
-                        <div class="detail-row" v-if="entry.subtitle">
-                            <strong>Subtitle:</strong> {{ entry.subtitle }}
-                        </div>
-                        <div class="detail-row">
-                            <strong>Options:</strong>
-                            <ul v-if="hasOptions(entry)">
-                                <li v-if="entry.option1"
-                                    :class="{ 'correct-option': 1 === parseInt(entry.correctAnswer) }">
-                                    1. {{ entry.option1 }}
-                                </li>
-                                <li v-if="entry.option2"
-                                    :class="{ 'correct-option': 2 === parseInt(entry.correctAnswer) }">
-                                    2. {{ entry.option2 }}
-                                </li>
-                                <li v-if="entry.option3"
-                                    :class="{ 'correct-option': 3 === parseInt(entry.correctAnswer) }">
-                                    3. {{ entry.option3 }}
-                                </li>
-                                <li v-if="entry.option4"
-                                    :class="{ 'correct-option': 4 === parseInt(entry.correctAnswer) }">
-                                    4. {{ entry.option4 }}
-                                </li>
-                                <li v-if="entry.option5"
-                                    :class="{ 'correct-option': 5 === parseInt(entry.correctAnswer) }">
-                                    5. {{ entry.option5 }}
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="detail-row">
-                            <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
+                    <div class="detail-row">
+                        <strong>Question:</strong> {{ getQuestionText(entry) }}
+                    </div>
+                    <div class="detail-row" v-if="entry.questionP2">
+                        <strong>Question Part 2:</strong> {{ entry.questionP2 }}
+                    </div>
+                    <div class="detail-row">
+                        <strong>Answer Type:</strong> {{ entry.answer_type }}
+                    </div>
+                    <div class="detail-row" v-if="entry.subtitle">
+                        <strong>Subtitle:</strong> {{ entry.subtitle }}
+                    </div>
+                    <div class="detail-row">
+                        <strong>Options:</strong>
+                        <ul v-if="hasOptions(entry)">
+                            <li v-if="entry.option1" :class="{ 'correct-option': 1 === parseInt(entry.correctAnswer) }">
+                                1. {{ entry.option1 }}
+                            </li>
+                            <li v-if="entry.option2" :class="{ 'correct-option': 2 === parseInt(entry.correctAnswer) }">
+                                2. {{ entry.option2 }}
+                            </li>
+                            <li v-if="entry.option3" :class="{ 'correct-option': 3 === parseInt(entry.correctAnswer) }">
+                                3. {{ entry.option3 }}
+                            </li>
+                            <li v-if="entry.option4" :class="{ 'correct-option': 4 === parseInt(entry.correctAnswer) }">
+                                4. {{ entry.option4 }}
+                            </li>
+                            <li v-if="entry.option5" :class="{ 'correct-option': 5 === parseInt(entry.correctAnswer) }">
+                                5. {{ entry.option5 }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
+                    </div>
+
+                    <template v-if="entry.originalId">
+                        <div class="comparison-header" v-if="hasDifferences(entry)">
+                            <h4>Changes from Original:</h4>
                         </div>
 
-                        <template v-if="entry.originalId">
-                            <div class="comparison-header" v-if="hasDifferences(entry)">
-                                <h4>Changes from Original:</h4>
-                            </div>
-
-                            <template
-                                v-for="(field, fieldName) in compareEntries(entry, getOriginalEntry(entry.originalId))"
-                                :key="fieldName">
-                                <div class="detail-row difference">
-                                    <strong>{{ fieldName }}:</strong>
-                                    <div class="diff-view">
-                                        <div class="original">
-                                            <span class="diff-label">Original:</span>
-                                            <span class="diff-content">{{ field.original || 'empty' }}</span>
-                                        </div>
-                                        <div class="draft">
-                                            <span class="diff-label">Draft:</span>
-                                            <span class="diff-content">{{ field.draft || 'empty' }}</span>
-                                        </div>
+                        <template
+                            v-for="(field, fieldName) in compareEntries(entry, getOriginalEntry(entry.originalId))"
+                            :key="fieldName">
+                            <div class="detail-row difference">
+                                <strong>{{ fieldName }}:</strong>
+                                <div class="diff-view">
+                                    <div class="original">
+                                        <span class="diff-label">Original:</span>
+                                        <span class="diff-content">{{ field.original || 'empty' }}</span>
+                                    </div>
+                                    <div class="draft">
+                                        <span class="diff-label">Draft:</span>
+                                        <span class="diff-content">{{ field.draft || 'empty' }}</span>
                                     </div>
                                 </div>
-                            </template>
+                            </div>
                         </template>
-                    </div>
+                    </template>
                 </div>
             </div>
-            <div v-else-if="entriesError" class="error">
-                {{ entriesError }}
-            </div>
-            <div v-else>
-                No quiz entries found
-            </div>
         </div>
+        <div v-else-if="entriesError" class="error">
+            {{ entriesError }}
+        </div>
+        <div v-else>
+            No quiz entries found
+        </div>
+    </div>
 
-        <!-- Dashboard Data Section -->
-        <div class="dashboard-data">
-            <h3>Dashboard Analytics</h3>
-            <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
-            <div v-if="dashboardSummary" class="summary-display">
-                <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
-                <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
-                <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
-            </div>
+    <!-- Dashboard Data Section -->
+    <div class="dashboard-data">
+        <h3>Dashboard Analytics</h3>
+        <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
+        <div v-if="dashboardSummary" class="summary-display">
+            <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
+            <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
+            <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
         </div>
     </div>
 </template>
@@ -997,13 +988,13 @@ h1 {
 .incorrect-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     font-size: 0.9rem;
 }
 
 .incorrect-table th,
 .incorrect-table td {
-    padding: 0.5rem;
+    padding: 0.35rem 0.5rem;
     text-align: left;
     border: 1px solid var(--border-color);
 }
@@ -1019,5 +1010,17 @@ h1 {
 
 .incorrect-table tr:hover {
     background-color: var(--hover-bg);
+}
+
+.incorrect-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.incorrect-section strong {
+    text-align: left;
+    margin-bottom: 0.25rem;
 }
 </style>
