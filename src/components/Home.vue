@@ -69,11 +69,22 @@
 
                         <div class="detail-row" v-if="progress.incorrectQuestions?.length">
                             <strong>Incorrect Questions:</strong>
-                            <ul class="incorrect-list">
-                                <li v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                    {{ formatIncorrectQuestion(q) }}
-                                </li>
-                            </ul>
+                            <table class="incorrect-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question ID</th>
+                                        <th>Title</th>
+                                        <th>Chosen Answer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(q, index) in progress.incorrectQuestions" :key="index">
+                                        <td>{{ q.id || 'N/A' }}</td>
+                                        <td>{{ q.title || 'N/A' }}</td>
+                                        <td>{{ q.chosenAnswer || 'N/A' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="detail-row">
@@ -981,5 +992,32 @@ h1 {
 .progress-header-text {
     text-align: left;
     font-size: 0.9rem;
+}
+
+.incorrect-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.incorrect-table th,
+.incorrect-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+.incorrect-table th {
+    background-color: var(--bg-secondary);
+    font-weight: bold;
+}
+
+.incorrect-table tr:nth-child(even) {
+    background-color: var(--bg-secondary);
+}
+
+.incorrect-table tr:hover {
+    background-color: var(--hover-bg);
 }
 </style>
