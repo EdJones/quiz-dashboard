@@ -37,115 +37,22 @@
         </div>
 
         <!-- User Progress Tab -->
-        <div v-if="activeTab === 'progress'" class="user-progress">
-            <h3>User Progress</h3>
-            <button class="button-75" @click="loadUserProgress">Load User Progress</button>
+        <UserProgress v-if="activeTab === 'progress'" />
 
-            <div v-if="userProgressList.length" class="progress-list">
-                <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
-                    <div class="progress-header">
-                        <p class="progress-header-text" style="text-align: left; font-size: 0.9rem;">
-                            <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span><br>
-                            User {{ getUserDisplayName(progress.userId) }}<br>
-                            Quiz {{ progress.quizId }} - {{ getQuizTitle(progress.quizId) }}<br>
-                            ({{ progress.userAnswers.length - progress.incorrectQuestions.length }} of {{
-                                progress.userAnswers.length }} correct)<br>
-                        </p>
-                    </div>
-
-                    <div class="progress-details">
-                        <!-- Feedback section -->
-                        <div class="detail-row feedback-section" v-if="progress.feedback">
-                            <strong>Feedback:</strong> {{ progress.feedback }}
-                        </div>
-
-                        <!-- Incorrect Questions section -->
-                        <div class="detail-row" v-if="progress.incorrectQuestions?.length">
-                            <div class="incorrect-section">
-                                <strong>Incorrect Questions:</strong>
-                                <table class="incorrect-table">
-                                    <thead>
-                                        <tr>
-                                            <th>QuizItem</th>
-                                            <th>Question</th>
-                                            <th>Answer Chosen</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="(q, index) in progress.incorrectQuestions" :key="index">
-                                            <td>{{ q.id || 'N/A' }}</td>
-                                            <td>{{ q.title || 'N/A' }}</td>
-                                            <td>{{ q.chosenAnswer || 'N/A' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Answers section -->
-                        <div class="detail-row2">
-                            <div class="answers-header" @click="toggleAnswers(progress.id)">
-                                <div class="header-info">
-                                    <strong>Answers</strong>
-                                    <span class="question-count" v-if="progress.userAnswers?.length">
-                                        (Question {{ progress.userAnswers.length }})
-                                    </span>
-                                </div>
-                                <button class="toggle-btn">
-                                    {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
-                                </button>
-                            </div>
-                            <ul class="answers-list" v-if="showAnswersMap[progress.id]">
-                                <li v-for="(answer, index) in progress.userAnswers" :key="index">
-                                    Q{{ index + 1 }}: {{ answer }}
-                                </li>
-                            </ul>
-                            <table class="incorrect-table">
-                                <thead>
-                                    <tr>
-                                        <th>QuizItem</th>
-                                        <th>Question</th>
-                                        <th>Answer Chosen</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(answer, index) in progress.userAnswers" :key="index"
-                                        :class="{ 'incorrect-answer': isAnswerIncorrect(answer.questionId, answer.selected) }">
-                                        <td>{{ answer.questionId || 'N/A' }}</td>
-                                        <td>{{ answer.questionTitle || 'N/A' }} <br>
-                                            {{ getQuestionFromQuizEntries(answer.questionId) || 'N/A' }}</td>
-                                        <td>{{ answer.selected || 'N/A' }}</td>
-                                        <td>{{ getAnswerText(answer.questionId, answer.selected) || 'N/A' }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        <!-- Dashboard Data Section -->
+        <div class="dashboard-data">
+            <h3>Dashboard Analytics</h3>
+            <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
+            <div v-if="dashboardSummary" class="summary-display">
+                <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
+                <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
+                <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
             </div>
-        </div>
-        <div v-else-if="error" class="error">
-            {{ error }}
-        </div>
-        <div v-else>
-            No user progress found
         </div>
     </div>
 
     <!-- Quiz Entries Tab -->
     <QuizEntries v-if="activeTab === 'entries'" />
-
-    <!-- Dashboard Data Section -->
-    <div class="dashboard-data">
-        <h3>Dashboard Analytics</h3>
-        <button class="button-75" @click="saveDashboardSummary">Save Current Summary</button>
-        <div v-if="dashboardSummary" class="summary-display">
-            <p>Total Users: {{ dashboardSummary.totalUsers }}</p>
-            <p>Total Attempts: {{ dashboardSummary.totalAttempts }}</p>
-            <p>Last Updated: {{ formatDate(dashboardSummary.lastUpdated) }}</p>
-        </div>
-    </div>
 </template>
 
 <script>
@@ -163,23 +70,17 @@ import { quizSets } from '../data/quizSets';
 import { quizEntries } from '../data/quiz-items';
 import { useAuthStore } from '../stores/auth';
 import QuizEntries from './QuizEntries.vue';
+import UserProgress from './UserProgress.vue';
 
 export default {
     name: 'Home',
     components: {
-        QuizEntries
+        QuizEntries,
+        UserProgress
     },
     data() {
         return {
-            userProgressList: [],
             dashboardSummary: null,
-            error: null,
-            showAnswersMap: {},
-            userDisplayNames: {
-                'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
-                'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
-                '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
-            },
             debug: false,
             testResults: null,
             notification: {
@@ -190,64 +91,7 @@ export default {
             activeTab: 'progress'
         }
     },
-    computed: {
-        sortedProgress() {
-            return [...this.userProgressList].sort((a, b) => {
-                const dateA = a.lastUpdated?.toDate() || new Date(0);
-                const dateB = b.lastUpdated?.toDate() || new Date(0);
-                return dateB - dateA;
-            });
-        },
-        sortedEntries() {
-            return [...this.quizEntriesList].sort((a, b) => {
-                const dateA = a.timestamp?.toDate() || new Date(0);
-                const dateB = b.timestamp?.toDate() || new Date(0);
-                return dateB - dateA;
-            });
-        }
-    },
-    mounted() {
-        // Remove automatic data loading
-        // We'll load data after confirming auth
-    },
-    async created() {
-        const authStore = useAuthStore();
-
-        // Wait for auth to be ready
-        if (!authStore.user) {
-            console.log('[Home] No authenticated user, redirecting to login');
-            this.$router.push('/login');
-            return;
-        }
-
-        // Only load data if we have an authenticated user
-        console.log('[Home] User authenticated, loading data...');
-        await this.loadUserProgress();
-    },
     methods: {
-        async loadUserProgress() {
-            try {
-                console.log('Loading all user data...');
-
-                // Get all quiz attempts
-                const attempts = await getQuizAttempts();
-                console.log('Quiz attempts loaded:', attempts.length);
-
-                // Get all user progress
-                const progress = await getUserProgress();
-                console.log('User progress loaded:', progress.length);
-
-                // Combine the data
-                //this.userProgressList = [...attempts, ...progress];
-                this.userProgressList = [...progress];
-
-
-            } catch (error) {
-                console.error('Error loading data:', error);
-                this.error = error.message;
-            }
-        },
-
         async saveDashboardSummary() {
             try {
                 const summary = {
@@ -278,67 +122,6 @@ export default {
             if (!timestamp) return 'No date';
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             return date.toLocaleString();
-        },
-
-        toggleAnswers(progressId) {
-            this.showAnswersMap[progressId] = !this.showAnswersMap[progressId];
-            this.showAnswersMap = { ...this.showAnswersMap };
-        },
-
-        getUserDisplayName(userId) {
-            return this.userDisplayNames[userId] || userId;
-        },
-
-        getQuizTitle(quizId) {
-            const quiz = quizSets.find(set =>
-                set.items.includes(parseInt(quizId))
-            );
-            return quiz ? quiz.setName : `Quiz ${quizId}`;
-        },
-        getAnswerText(questionId, selectedNumber) {
-            console.log('getAnswerText', questionId, selectedNumber);
-            if (!questionId || !selectedNumber) return null;
-
-            const quizItem = quizEntries.find(item => item.id === questionId);
-            if (!quizItem) return null;
-
-            // Using option1, option2, etc. as the field names
-            const optionKey = `option${selectedNumber}`;
-            return quizItem[optionKey];
-        },
-
-
-
-        async testDatabases() {
-            this.testResults = 'Testing databases...\n';
-
-            try {
-                // Test SORQuizzes DB
-                const attempts = await getQuizAttempts();
-                this.testResults += `✅ SORQuizzes DB: Found ${attempts.length} quiz attempts\n`;
-
-                // Test Dashboard DB
-                const testData = {
-                    id: 'test-' + Date.now(),
-                    message: 'Test data'
-                };
-                await saveDashboardData(testData);
-                this.testResults += '✅ Dashboard DB: Successfully saved test data\n';
-
-            } catch (error) {
-                this.testResults += `❌ Error: ${error.message}\n`;
-                console.error('Database test error:', error);
-            }
-        },
-
-        formatIncorrectQuestion(question) {
-            if (!question) return '';
-
-            return {
-                id: question.id || '',
-                title: question.title || '',
-                chosenAnswer: question.chosenAnswer || ''
-            };
         },
 
         async handleLogout() {
