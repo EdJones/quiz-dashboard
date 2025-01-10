@@ -1,7 +1,7 @@
 <template>
     <div class="summary">
-        <h3>Summary</h3>
-        <button class="button-75" @click="loadSummary">Load Summary</button>
+        <button @click="loadSummary" class="button-75">Refresh</button>
+        <div v-if="error" class="error">{{ error }}</div>
 
         <div v-if="summaryData" class="summary-content">
             <div class="summary-card">
@@ -49,9 +49,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div v-else-if="error" class="error">
-            {{ error }}
         </div>
         <div v-else>
             No summary data found
@@ -349,37 +346,45 @@ export default {
                 attempt.userAnswers?.filter(answer =>
                     parseInt(answer.questionId) === itemId) || []);
 
-            // Count all answers, not just incorrect ones
-            const distribution = {};
+            // Find all available options (1 through 5 if they exist)
+            const availableOptions = {};
+            for (let i = 1; i <= 5; i++) {
+                const optionKey = `option${i}`;
+                if (quizItem[optionKey] && quizItem[optionKey].trim() !== '') {
+                    availableOptions[i] = 0; // Initialize with 0 responses
+                }
+            }
+
+            // Count all answers
             answers.forEach(answer => {
                 let option = answer.selected;
                 if (option) {
-                    distribution[option] = (distribution[option] || 0) + 1;
+                    availableOptions[option] = (availableOptions[option] || 0) + 1;
                 }
             });
 
             // Convert to percentages
-            const total = answers.length;
+            const total = answers.length || 1; // Prevent division by zero
             const percentages = {};
-            Object.keys(distribution).forEach(key => {
-                percentages[key] = Math.round((distribution[key] / total) * 100);
+            Object.keys(availableOptions).forEach(key => {
+                percentages[key] = Math.round((availableOptions[key] / total) * 100);
             });
 
             // Create chart data with different colors for correct/incorrect answers
             const chartData = {
-                labels: Object.keys(percentages).map(key => {
+                labels: Object.keys(availableOptions).map(key => {
                     const optionKey = `option${key}`;
                     const optionText = quizItem[optionKey];
                     const isCorrect = parseInt(key) === parseInt(quizItem.correctAnswer);
                     return `Option ${key}${isCorrect ? ' ✓' : ''}: ${optionText || 'Unknown'}`;
                 }),
                 datasets: [{
-                    backgroundColor: Object.keys(percentages).map(key =>
+                    backgroundColor: Object.keys(availableOptions).map(key =>
                         parseInt(key) === parseInt(quizItem.correctAnswer)
                             ? 'rgba(75, 192, 192, 0.5)'  // Green for correct
                             : 'rgba(255, 99, 132, 0.5)'  // Red for incorrect
                     ),
-                    borderColor: Object.keys(percentages).map(key =>
+                    borderColor: Object.keys(availableOptions).map(key =>
                         parseInt(key) === parseInt(quizItem.correctAnswer)
                             ? 'rgb(75, 192, 192)'  // Green for correct
                             : 'rgb(255, 99, 132)'  // Red for incorrect
@@ -398,6 +403,9 @@ export default {
                 this.answerData = await this.getAnswerDistribution(newId);
             }
         }
+    },
+    mounted() {
+        this.loadSummary();
     }
 }
 </script>

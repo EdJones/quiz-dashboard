@@ -772,4 +772,72 @@ h1 {
     background-color: rgba(104, 68, 68, 0.1) !important;
     color: #bc202f;
 }
+
+/* Update the tab container and buttons */
+.tab-container {
+    display: flex;
+    gap: 1.5rem;
+    /* Increased gap between buttons */
+    margin: 2rem auto;
+    max-width: 800px;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex: 1;
+    max-width: 200px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button:hover {
+    background: var(--hover-bg);
+    transform: translateY(-1px);
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #646cff, #535bf2);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.tab-button.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 2px;
+}
+
+/* Adjust the Issues button to match */
+.tab-container .button-75 {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    max-width: 200px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-container .button-75:hover {
+    background: var(--hover-bg);
+    transform: translateY(-1px);
+}
 </style>
