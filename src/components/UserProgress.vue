@@ -1,7 +1,6 @@
 <template>
     <div class="user-progress">
-        <h3>User Progress</h3>
-        <button class="button-75" @click="loadUserProgress">Load User Progress</button>
+        <button class="button-75" @click="loadUserProgress">Refresh</button>
 
         <div v-if="userProgressList.length" class="progress-list">
             <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
@@ -147,6 +146,9 @@ export default {
             const quizItem = quizEntries.find(item => item.id === questionId);
             return quizItem && parseInt(quizItem.correctAnswer) !== parseInt(selectedAnswer);
         }
+    },
+    mounted() {
+        this.loadUserProgress();
     }
 }
 </script>
