@@ -330,39 +330,64 @@ export default {
         async getAnswerDistribution(itemId) {
             const progress = await getUserProgress();
             const quizItem = quizEntries.find(q => q.id === itemId);
+            console.log('Quiz Item:', quizItem);
 
             // Get all answers for this question
             const answers = progress.flatMap(attempt =>
                 attempt.userAnswers?.filter(answer =>
                     parseInt(answer.questionId) === itemId) || []);
 
+            console.log('Raw answers:', answers);
+
             // Count incorrect answers by option
-            const incorrectAnswers = answers.filter(answer =>
-                parseInt(answer.selectedAnswer) !== quizItem.correctAnswer);
+            const incorrectAnswers = answers.filter(answer => {
+                console.log('Checking answer:', answer);
+                let selectedAnswer = answer.answer; // Try 'answer' instead of 'selectedAnswer'
+                console.log('Selected answer:', selectedAnswer);
+                return selectedAnswer != quizItem.correctAnswer;
+            });
+
+            console.log('Incorrect answers:', incorrectAnswers);
 
             // Count occurrences of each wrong answer
             const distribution = {};
             incorrectAnswers.forEach(answer => {
-                const option = answer.selectedAnswer;
-                distribution[option] = (distribution[option] || 0) + 1;
+                let option = answer.answer; // Try 'answer' instead of 'selectedAnswer'
+                if (option) {
+                    distribution[option] = (distribution[option] || 0) + 1;
+                }
             });
+
+            console.log('Distribution:', distribution);
 
             // Convert to percentages
             const total = incorrectAnswers.length;
+            const percentages = {};
             Object.keys(distribution).forEach(key => {
-                distribution[key] = Math.round((distribution[key] / total) * 100);
+                percentages[key] = Math.round((distribution[key] / total) * 100);
             });
 
-            return {
-                labels: Object.keys(distribution).map(key =>
-                    `Option ${key}: ${quizItem[`option${key}`] || 'Unknown'}`),
+            console.log('Percentages:', percentages);
+
+            // Create chart data
+            const chartData = {
+                labels: Object.keys(percentages).map(key => {
+                    const optionKey = `option${key}`;
+                    const optionText = quizItem[optionKey];
+                    console.log('Option lookup:', { key, optionKey, optionText });
+                    return `Option ${key}: ${optionText || 'Unknown'}`;
+                }),
                 datasets: [{
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 1,
-                    data: Object.values(distribution)
+                    data: Object.values(percentages)
                 }]
             };
+
+            console.log('Final chart data:', chartData);
+
+            return chartData;
         }
     },
     watch: {
