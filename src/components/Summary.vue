@@ -330,62 +330,51 @@ export default {
         async getAnswerDistribution(itemId) {
             const progress = await getUserProgress();
             const quizItem = quizEntries.find(q => q.id === itemId);
-            console.log('Quiz Item:', quizItem);
 
             // Get all answers for this question
             const answers = progress.flatMap(attempt =>
                 attempt.userAnswers?.filter(answer =>
                     parseInt(answer.questionId) === itemId) || []);
 
-            console.log('Raw answers:', answers);
-
-            // Count incorrect answers by option
-            const incorrectAnswers = answers.filter(answer => {
-                console.log('Checking answer:', answer);
-                let selectedAnswer = answer.selected; // Changed from answer to selected
-                console.log('Selected answer:', selectedAnswer);
-                return selectedAnswer != quizItem.correctAnswer;
-            });
-
-            console.log('Incorrect answers:', incorrectAnswers);
-
-            // Count occurrences of each wrong answer
+            // Count all answers, not just incorrect ones
             const distribution = {};
-            incorrectAnswers.forEach(answer => {
-                let option = answer.selected; // Changed from answer to selected
+            answers.forEach(answer => {
+                let option = answer.selected;
                 if (option) {
                     distribution[option] = (distribution[option] || 0) + 1;
                 }
             });
 
-            console.log('Distribution:', distribution);
-
             // Convert to percentages
-            const total = incorrectAnswers.length;
+            const total = answers.length;
             const percentages = {};
             Object.keys(distribution).forEach(key => {
                 percentages[key] = Math.round((distribution[key] / total) * 100);
             });
 
-            console.log('Percentages:', percentages);
-
-            // Create chart data
+            // Create chart data with different colors for correct/incorrect answers
             const chartData = {
                 labels: Object.keys(percentages).map(key => {
                     const optionKey = `option${key}`;
                     const optionText = quizItem[optionKey];
-                    console.log('Option lookup:', { key, optionKey, optionText });
-                    return `Option ${key}: ${optionText || 'Unknown'}`;
+                    const isCorrect = parseInt(key) === parseInt(quizItem.correctAnswer);
+                    return `Option ${key}${isCorrect ? ' ✓' : ''}: ${optionText || 'Unknown'}`;
                 }),
                 datasets: [{
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: Object.keys(percentages).map(key =>
+                        parseInt(key) === parseInt(quizItem.correctAnswer)
+                            ? 'rgba(75, 192, 192, 0.5)'  // Green for correct
+                            : 'rgba(255, 99, 132, 0.5)'  // Red for incorrect
+                    ),
+                    borderColor: Object.keys(percentages).map(key =>
+                        parseInt(key) === parseInt(quizItem.correctAnswer)
+                            ? 'rgb(75, 192, 192)'  // Green for correct
+                            : 'rgb(255, 99, 132)'  // Red for incorrect
+                    ),
                     borderWidth: 1,
                     data: Object.values(percentages)
                 }]
             };
-
-            console.log('Final chart data:', chartData);
 
             return chartData;
         }
