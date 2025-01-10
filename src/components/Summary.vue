@@ -57,6 +57,7 @@
 <script>
 import { getUserProgress } from '../firebase';
 import { quizSets } from '../data/quizSets';
+import { quizEntries } from '../data/quiz-items';
 import { Bar } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -141,7 +142,8 @@ export default {
                         }
                     },
                     y: {
-                        stacked: true
+                        stacked: true,
+                        barThickness: 12
                     }
                 }
             }
@@ -245,9 +247,11 @@ export default {
         },
         getItemChartData(itemAnalysis) {
             return {
-                labels: itemAnalysis.map(item =>
-                    `Question ${item.itemId}${item.totalAttempts === 0 ? ' (No attempts)' : ''}`
-                ),
+                labels: itemAnalysis.map(item => {
+                    const quizItem = quizEntries.find(q => q.id === item.itemId);
+                    const title = quizItem?.title || quizItem?.Question?.slice(0, 50) || `Question ${item.itemId}`;
+                    return `${title}${item.totalAttempts === 0 ? ' (No attempts)' : ''}`;
+                }),
                 datasets: [
                     {
                         label: 'Incorrect',
@@ -404,7 +408,7 @@ export default {
 
 .item-chart-container {
     width: 100%;
-    height: 400px;
+    height: 300px;
     margin-top: 1rem;
     padding: 1rem;
     background-color: var(--bg-primary);
@@ -415,7 +419,7 @@ export default {
 
 @media (max-width: 768px) {
     .item-chart-container {
-        height: 500px;
+        height: 400px;
     }
 }
 </style>
