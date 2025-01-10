@@ -24,6 +24,20 @@
                 <div class="stat-value">{{ summaryData.totalIncorrect }}</div>
                 <div class="stat-label">Total Incorrect ({{ summaryData.incorrectPercentage }}%)</div>
             </div>
+
+            <div class="analysis-section">
+                <h3>Analysis by Quiz Set</h3>
+                <div class="quiz-set-analysis">
+                    <div v-for="(set, index) in summaryData.quizSetAnalysis" :key="index" class="quiz-set-card">
+                        <h4>{{ set.setName }}</h4>
+                        <div class="stat-row">
+                            <span>Total Questions: {{ set.totalQuestions }}</span>
+                            <span>Incorrect: {{ set.incorrectCount }}</span>
+                            <span>Error Rate: {{ set.errorRate }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div v-else-if="error" class="error">
             {{ error }}
@@ -36,6 +50,7 @@
 
 <script>
 import { getUserProgress } from '../firebase';
+import { quizSets } from '../data/quizSets';
 
 export default {
     name: 'Summary',
@@ -62,13 +77,33 @@ export default {
                     ? Math.round((totalIncorrect / totalQuestions) * 100)
                     : 0;
 
+                // Analyze by quiz set
+                const quizSetAnalysis = quizSets.map(set => {
+                    const setQuestions = progress.flatMap(attempt =>
+                        attempt.userAnswers?.filter(answer =>
+                            set.items.includes(parseInt(answer.questionId))) || []);
+                    const setIncorrect = progress.flatMap(attempt =>
+                        attempt.incorrectQuestions?.filter(q =>
+                            set.items.includes(parseInt(q.id))) || []);
+
+                    return {
+                        setName: set.setName,
+                        totalQuestions: setQuestions.length,
+                        incorrectCount: setIncorrect.length,
+                        errorRate: setQuestions.length > 0
+                            ? Math.round((setIncorrect.length / setQuestions.length) * 100)
+                            : 0
+                    };
+                }).filter(set => set.totalQuestions > 0); // Only show sets with attempts
+
                 this.summaryData = {
                     totalProgress: progress.length,
                     totalQuestions: totalQuestions,
                     totalCorrect: totalCorrect,
                     totalIncorrect: totalIncorrect,
                     correctPercentage: correctPercentage,
-                    incorrectPercentage: incorrectPercentage
+                    incorrectPercentage: incorrectPercentage,
+                    quizSetAnalysis
                 };
             } catch (error) {
                 console.error('Error loading summary:', error);
@@ -151,5 +186,46 @@ export default {
     border-radius: 4px;
     margin: 1rem 0;
     background-color: rgba(255, 68, 68, 0.1);
+}
+
+.analysis-section {
+    width: 100%;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.quiz-set-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.quiz-set-card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.quiz-set-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.stat-row {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .stat-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 </style>
