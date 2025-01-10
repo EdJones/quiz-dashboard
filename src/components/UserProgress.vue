@@ -38,31 +38,30 @@
                                 {{ showAnswersMap[progress.id] ? 'Hide' : 'Show' }}
                             </button>
                         </div>
-                        <ul class="answers-list" v-if="showAnswersMap[progress.id]">
-                            <li v-for="(answer, index) in progress.userAnswers" :key="index">
-                                Q{{ index + 1 }}: {{ answer }}
-                            </li>
-                        </ul>
-                        <table class="incorrect-table">
-                            <thead>
-                                <tr>
-                                    <th>QuizItem</th>
-                                    <th>Question</th>
-                                    <th>Answer Chosen</th>
-                                    <th>Answer Text</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(answer, index) in progress.userAnswers" :key="index"
-                                    :class="{ 'incorrect-answer': isAnswerIncorrect(answer.questionId, answer.selected) }">
-                                    <td>{{ answer.questionId || 'N/A' }}</td>
-                                    <td>{{ answer.questionTitle || 'N/A' }} <br>
-                                        {{ getQuestionFromQuizEntries(answer.questionId) || 'N/A' }}</td>
-                                    <td>{{ answer.selected || 'N/A' }}</td>
-                                    <td>{{ getAnswerText(answer.questionId, answer.selected) || 'N/A' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                        <!-- Show either the table or the list based on showAnswersMap -->
+                        <div v-if="showAnswersMap[progress.id]">
+                            <table class="incorrect-table">
+                                <thead>
+                                    <tr>
+                                        <th>QuizItem</th>
+                                        <th>Question</th>
+                                        <th>Answer Chosen</th>
+                                        <th>Answer Text</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(answer, index) in progress.userAnswers" :key="index"
+                                        :class="{ 'incorrect-answer': isAnswerIncorrect(answer.questionId, answer.selected) }">
+                                        <td>{{ answer.questionId || 'N/A' }}</td>
+                                        <td>{{ answer.questionTitle || 'N/A' }} <br>
+                                            {{ getQuestionFromQuizEntries(answer.questionId) || 'N/A' }}</td>
+                                        <td>{{ answer.selected || 'N/A' }}</td>
+                                        <td>{{ getAnswerText(answer.questionId, answer.selected) || 'N/A' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -253,6 +252,22 @@ export default {
     margin-top: 0.5rem;
 }
 
+.answers-list li {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.answers-list li:last-child {
+    margin-bottom: 0;
+}
+
+.answers-list li:hover {
+    background-color: var(--hover-bg);
+}
+
 .toggle-btn {
     padding: 0.25rem 0.75rem;
     border: 1px solid var(--border-color);
@@ -266,7 +281,8 @@ export default {
 /* Table Styling */
 .incorrect-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
     margin-top: 0.25rem;
     font-size: 0.9rem;
 }
@@ -276,6 +292,7 @@ export default {
     padding: 0.35rem;
     text-align: left;
     border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
 }
 
 .incorrect-table th {
@@ -294,6 +311,17 @@ export default {
 .incorrect-answer {
     background-color: rgba(255, 0, 0, 0.1) !important;
     color: #dc3545;
+}
+
+/* Add rounded corners to cells */
+.incorrect-table tr td:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.incorrect-table tr td:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 /* Button Styling */
