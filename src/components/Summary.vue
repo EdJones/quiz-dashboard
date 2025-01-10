@@ -41,6 +41,11 @@
                         <div class="item-chart-container">
                             <Bar :data="getItemChartData(set.itemAnalysis)" :options="itemChartOptions" />
                         </div>
+
+                        <!-- Add answer distribution chart when an item is selected -->
+                        <div v-if="selectedItem && set.items.includes(selectedItem)" class="answer-chart-container">
+                            <Bar v-if="answerData" :data="answerData" :options="answerChartOptions" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,6 +92,8 @@ export default {
         return {
             summaryData: null,
             error: null,
+            selectedItem: null,
+            answerData: null,
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -107,6 +114,13 @@ export default {
                                 return value + '%';
                             }
                         }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const dataIndex = elements[0].index;
+                        const itemId = elements[0].element.$context.dataset.itemIds[dataIndex];
+                        this.selectedItem = itemId;
                     }
                 }
             },
@@ -151,6 +165,41 @@ export default {
                         stacked: true,
                         barThickness: 12
                     }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const dataIndex = elements[0].index;
+                        const itemId = elements[0].element.$context.dataset.itemIds[dataIndex];
+                        console.log('Clicked item:', itemId);
+                        this.selectedItem = itemId;
+                    }
+                }
+            },
+            answerChartOptions: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Incorrect Answer Distribution'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    y: {
+                        barThickness: 12
+                    }
                 }
             }
         }
@@ -185,17 +234,6 @@ export default {
             try {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
-                const totalQuestions = progress.reduce((sum, attempt) =>
-                    sum + (attempt.userAnswers?.length || 0), 0);
-                const totalIncorrect = progress.reduce((sum, attempt) =>
-                    sum + (attempt.incorrectQuestions?.length || 0), 0);
-                const totalCorrect = totalQuestions - totalIncorrect;
-                const correctPercentage = totalQuestions > 0
-                    ? Math.round((totalCorrect / totalQuestions) * 100)
-                    : 0;
-                const incorrectPercentage = totalQuestions > 0
-                    ? Math.round((totalIncorrect / totalQuestions) * 100)
-                    : 0;
 
                 // Analyze by quiz set with item-level analysis
                 const quizSetAnalysis = quizSets.map(set => {
@@ -209,7 +247,7 @@ export default {
                         attempt.incorrectQuestions?.filter(q =>
                             setItems.includes(parseInt(q.id))) || []);
 
-                    // Analyze individual items in the set - show all items from the set
+                    // Analyze individual items in the set
                     const itemAnalysis = setItems.map(itemId => {
                         const itemAttempts = setQuestions.filter(q =>
                             parseInt(q.questionId) === itemId);
@@ -228,6 +266,7 @@ export default {
 
                     return {
                         setName: set.setName,
+                        items: setItems,
                         totalQuestions: setQuestions.length,
                         incorrectCount: setIncorrect.length,
                         errorRate: setQuestions.length > 0
@@ -235,17 +274,27 @@ export default {
                             : 0,
                         itemAnalysis
                     };
-                }).filter(set => set.totalQuestions > 0);
+                });
 
                 this.summaryData = {
                     totalProgress: progress.length,
-                    totalQuestions: totalQuestions,
-                    totalCorrect: totalCorrect,
-                    totalIncorrect: totalIncorrect,
-                    correctPercentage: correctPercentage,
-                    incorrectPercentage: incorrectPercentage,
+                    totalQuestions: progress.reduce((sum, attempt) =>
+                        sum + (attempt.userAnswers?.length || 0), 0),
+                    totalCorrect: progress.reduce((sum, attempt) =>
+                        sum + ((attempt.userAnswers?.length || 0) - (attempt.incorrectQuestions?.length || 0)), 0),
+                    totalIncorrect: progress.reduce((sum, attempt) =>
+                        sum + (attempt.incorrectQuestions?.length || 0), 0),
                     quizSetAnalysis
                 };
+
+                // Calculate percentages
+                this.summaryData.correctPercentage = this.summaryData.totalQuestions > 0
+                    ? Math.round((this.summaryData.totalCorrect / this.summaryData.totalQuestions) * 100)
+                    : 0;
+                this.summaryData.incorrectPercentage = this.summaryData.totalQuestions > 0
+                    ? Math.round((this.summaryData.totalIncorrect / this.summaryData.totalQuestions) * 100)
+                    : 0;
+
             } catch (error) {
                 console.error('Error loading summary:', error);
                 this.error = error.message;
@@ -277,6 +326,50 @@ export default {
                     }
                 ]
             };
+        },
+        async getAnswerDistribution(itemId) {
+            const progress = await getUserProgress();
+            const quizItem = quizEntries.find(q => q.id === itemId);
+
+            // Get all answers for this question
+            const answers = progress.flatMap(attempt =>
+                attempt.userAnswers?.filter(answer =>
+                    parseInt(answer.questionId) === itemId) || []);
+
+            // Count incorrect answers by option
+            const incorrectAnswers = answers.filter(answer =>
+                parseInt(answer.selectedAnswer) !== quizItem.correctAnswer);
+
+            // Count occurrences of each wrong answer
+            const distribution = {};
+            incorrectAnswers.forEach(answer => {
+                const option = answer.selectedAnswer;
+                distribution[option] = (distribution[option] || 0) + 1;
+            });
+
+            // Convert to percentages
+            const total = incorrectAnswers.length;
+            Object.keys(distribution).forEach(key => {
+                distribution[key] = Math.round((distribution[key] / total) * 100);
+            });
+
+            return {
+                labels: Object.keys(distribution).map(key =>
+                    `Option ${key}: ${quizItem[`option${key}`] || 'Unknown'}`),
+                datasets: [{
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 1,
+                    data: Object.values(distribution)
+                }]
+            };
+        }
+    },
+    watch: {
+        async selectedItem(newId) {
+            if (newId) {
+                this.answerData = await this.getAnswerDistribution(newId);
+            }
         }
     }
 }
@@ -429,5 +522,16 @@ export default {
     .item-chart-container {
         height: 400px;
     }
+}
+
+.answer-chart-container {
+    width: 100%;
+    height: 200px;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 </style>
