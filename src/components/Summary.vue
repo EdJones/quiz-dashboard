@@ -5,6 +5,11 @@
 
         <div v-if="summaryData" class="summary-content">
             <div class="summary-card">
+                <h4>Unique Users</h4>
+                <div class="stat-value">{{ summaryData.uniqueUsers }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="summary-card">
                 <h4>Quiz Attempts</h4>
                 <div class="stat-value">{{ summaryData.totalProgress }}</div>
                 <div class="stat-label">Total Attempts</div>
@@ -328,9 +333,16 @@ export default {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
 
-                // Filter out test users and store in data
-                this.filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
-                console.log('Filtered out test users. Remaining entries:', this.filteredProgress.length);
+                // Filter out test users and log before/after counts
+                console.log('Total progress entries before filtering:', progress.length);
+                const filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
+                console.log('Progress entries after filtering test users:', filteredProgress.length);
+
+                // Get unique users (excluding test users)
+                const uniqueUsersBefore = new Set(progress.map(p => p.userId)).size;
+                const uniqueUsersAfter = new Set(filteredProgress.map(p => p.userId)).size;
+                console.log('Unique users before filtering:', uniqueUsersBefore);
+                console.log('Unique users after filtering:', uniqueUsersAfter);
 
                 // Analyze by quiz set with item-level analysis
                 const quizSetAnalysis = quizSets
@@ -376,12 +388,13 @@ export default {
                     });
 
                 this.summaryData = {
-                    totalProgress: this.filteredProgress.length,
-                    totalQuestions: this.filteredProgress.reduce((sum, attempt) =>
+                    uniqueUsers: uniqueUsersAfter,  // Make sure we're using the filtered count
+                    totalProgress: filteredProgress.length,
+                    totalQuestions: filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.userAnswers?.length || 0), 0),
-                    totalCorrect: this.filteredProgress.reduce((sum, attempt) =>
+                    totalCorrect: filteredProgress.reduce((sum, attempt) =>
                         sum + ((attempt.userAnswers?.length || 0) - (attempt.incorrectQuestions?.length || 0)), 0),
-                    totalIncorrect: this.filteredProgress.reduce((sum, attempt) =>
+                    totalIncorrect: filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.incorrectQuestions?.length || 0), 0),
                     quizSetAnalysis
                 };
