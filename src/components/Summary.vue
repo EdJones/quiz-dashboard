@@ -38,6 +38,9 @@
                             <span>Incorrect: {{ set.incorrectCount }}</span>
                             <span>Error Rate: {{ set.errorRate }}%</span>
                         </div>
+                        <div class="item-chart-container">
+                            <Bar :data="getItemChartData(set.itemAnalysis)" :options="itemChartOptions" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,6 +108,31 @@ export default {
                         }
                     }
                 }
+            },
+            itemChartOptions: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
             }
         }
     },
@@ -150,14 +178,34 @@ export default {
                     ? Math.round((totalIncorrect / totalQuestions) * 100)
                     : 0;
 
-                // Analyze by quiz set
+                // Analyze by quiz set with item-level analysis
                 const quizSetAnalysis = quizSets.map(set => {
+                    // Ensure all IDs are parsed as integers
+                    const setItems = set.items.map(id => parseInt(id));
+
                     const setQuestions = progress.flatMap(attempt =>
                         attempt.userAnswers?.filter(answer =>
-                            set.items.includes(parseInt(answer.questionId))) || []);
+                            setItems.includes(parseInt(answer.questionId))) || []);
                     const setIncorrect = progress.flatMap(attempt =>
                         attempt.incorrectQuestions?.filter(q =>
-                            set.items.includes(parseInt(q.id))) || []);
+                            setItems.includes(parseInt(q.id))) || []);
+
+                    // Analyze individual items in the set - show all items from the set
+                    const itemAnalysis = setItems.map(itemId => {
+                        const itemAttempts = setQuestions.filter(q =>
+                            parseInt(q.questionId) === itemId);
+                        const itemIncorrect = setIncorrect.filter(q =>
+                            parseInt(q.id) === itemId);
+
+                        return {
+                            itemId,
+                            totalAttempts: itemAttempts.length,
+                            incorrectCount: itemIncorrect.length,
+                            errorRate: itemAttempts.length > 0
+                                ? Math.round((itemIncorrect.length / itemAttempts.length) * 100)
+                                : 0
+                        };
+                    });
 
                     return {
                         setName: set.setName,
@@ -165,9 +213,10 @@ export default {
                         incorrectCount: setIncorrect.length,
                         errorRate: setQuestions.length > 0
                             ? Math.round((setIncorrect.length / setQuestions.length) * 100)
-                            : 0
+                            : 0,
+                        itemAnalysis
                     };
-                }).filter(set => set.totalQuestions > 0); // Only show sets with attempts
+                }).filter(set => set.totalQuestions > 0);
 
                 this.summaryData = {
                     totalProgress: progress.length,
@@ -182,6 +231,29 @@ export default {
                 console.error('Error loading summary:', error);
                 this.error = error.message;
             }
+        },
+        getItemChartData(itemAnalysis) {
+            return {
+                labels: itemAnalysis.map(item =>
+                    `Question ${item.itemId}${item.totalAttempts === 0 ? ' (No attempts)' : ''}`
+                ),
+                datasets: [
+                    {
+                        label: 'Error Rate',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 1,
+                        data: itemAnalysis.map(item => item.errorRate)
+                    },
+                    {
+                        label: 'Success Rate',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 1,
+                        data: itemAnalysis.map(item => 100 - item.errorRate)
+                    }
+                ]
+            };
         }
     }
 }
@@ -316,6 +388,23 @@ export default {
 @media (max-width: 768px) {
     .chart-container {
         height: 300px;
+    }
+}
+
+.item-chart-container {
+    width: 100%;
+    height: 400px;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .item-chart-container {
+        height: 500px;
     }
 }
 </style>
