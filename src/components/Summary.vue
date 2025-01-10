@@ -27,6 +27,9 @@
 
             <div class="analysis-section">
                 <h3>Analysis by Quiz Set</h3>
+                <div class="chart-container">
+                    <Bar :data="chartData" :options="chartOptions" />
+                </div>
                 <div class="quiz-set-analysis">
                     <div v-for="(set, index) in summaryData.quizSetAnalysis" :key="index" class="quiz-set-card">
                         <h4>{{ set.setName }}</h4>
@@ -51,13 +54,83 @@
 <script>
 import { getUserProgress } from '../firebase';
 import { quizSets } from '../data/quizSets';
+import { Bar } from 'vue-chartjs';
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale
+} from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 export default {
     name: 'Summary',
+    components: {
+        Bar
+    },
     data() {
         return {
             summaryData: null,
-            error: null
+            error: null,
+            chartOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    computed: {
+        chartData() {
+            if (!this.summaryData?.quizSetAnalysis) return null;
+
+            return {
+                labels: this.summaryData.quizSetAnalysis.map(set => set.setName),
+                datasets: [
+                    {
+                        label: 'Error Rate',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 1,
+                        data: this.summaryData.quizSetAnalysis.map(set => set.errorRate)
+                    },
+                    {
+                        label: 'Success Rate',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 1,
+                        data: this.summaryData.quizSetAnalysis.map(set => 100 - set.errorRate)
+                    }
+                ]
+            };
         }
     },
     methods: {
@@ -226,6 +299,23 @@ export default {
     .stat-row {
         flex-direction: column;
         gap: 0.5rem;
+    }
+}
+
+.chart-container {
+    width: 100%;
+    height: 400px;
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
     }
 }
 </style>
