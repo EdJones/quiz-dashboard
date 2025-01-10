@@ -121,13 +121,6 @@ export default {
                     },
                     title: {
                         display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return context.dataset.label + ': ' + context.raw + '%';
-                            }
-                        }
                     }
                 },
                 scales: {
@@ -250,7 +243,7 @@ export default {
                 labels: itemAnalysis.map(item => {
                     const quizItem = quizEntries.find(q => q.id === item.itemId);
                     const title = quizItem?.title || quizItem?.Question?.slice(0, 50) || `Question ${item.itemId}`;
-                    return `${title}${item.totalAttempts === 0 ? ' (No attempts)' : ''}`;
+                    return `${title} (${item.totalAttempts} attempts)`;
                 }),
                 datasets: [
                     {
