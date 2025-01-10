@@ -342,7 +342,7 @@ export default {
             // Count incorrect answers by option
             const incorrectAnswers = answers.filter(answer => {
                 console.log('Checking answer:', answer);
-                let selectedAnswer = answer.answer; // Try 'answer' instead of 'selectedAnswer'
+                let selectedAnswer = answer.selected; // Changed from answer to selected
                 console.log('Selected answer:', selectedAnswer);
                 return selectedAnswer != quizItem.correctAnswer;
             });
@@ -352,7 +352,7 @@ export default {
             // Count occurrences of each wrong answer
             const distribution = {};
             incorrectAnswers.forEach(answer => {
-                let option = answer.answer; // Try 'answer' instead of 'selectedAnswer'
+                let option = answer.selected; // Changed from answer to selected
                 if (option) {
                     distribution[option] = (distribution[option] || 0) + 1;
                 }
