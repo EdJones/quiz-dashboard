@@ -1,6 +1,11 @@
 <template>
     <div class="user-progress">
-        <button class="button-75" @click="loadUserProgress">Refresh</button>
+        <div class="control-buttons">
+            <button class="button-75" @click="loadUserProgress">Refresh</button>
+            <button class="button-75" @click="toggleTestUsers">
+                {{ includeTestUsers ? 'Hide Test Users' : 'Show Test Users' }}
+            </button>
+        </div>
 
         <div v-if="userProgressList.length" class="progress-list">
             <div v-for="progress in sortedProgress" :key="progress.id" class="progress-item">
@@ -76,17 +81,27 @@ import { getQuizAttempts, getUserProgress } from '../firebase';
 import { quizSets } from '../data/quizSets';
 import { quizEntries } from '../data/quiz-items';
 
+const TEST_USER_IDS = [
+    'zaM4S3yvetUssR68ycGC2rM6mf23',  // Ed Laptop
+    'I7eOVyCifVfll20Nyb5uZrXnYX22',  // Ed iPhone
+    '2MF5B1lDM5U46QZkfcFXEdQtjK83',  // Ed iPhone
+    'KmfQrAykhVdK17QbOxSM2RwZdeB3'   // localhost - ed
+];
+
 export default {
     name: 'UserProgress',
     data() {
         return {
             userProgressList: [],
+            allProgress: [],
             error: null,
             showAnswersMap: {},
+            includeTestUsers: false,
             userDisplayNames: {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
-                '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone'
+                '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone',
+                'KmfQrAykhVdK17QbOxSM2RwZdeB3': 'localhost - ed'
             }
         }
     },
@@ -104,12 +119,22 @@ export default {
             try {
                 console.log('Loading all user data...');
                 const progress = await getUserProgress();
-                console.log('User progress loaded:', progress.length);
-                this.userProgressList = [...progress];
+                this.allProgress = progress;
+                this.filterProgress();
             } catch (error) {
                 console.error('Error loading data:', error);
                 this.error = error.message;
             }
+        },
+        filterProgress() {
+            this.userProgressList = this.includeTestUsers
+                ? [...this.allProgress]
+                : this.allProgress.filter(p => !TEST_USER_IDS.includes(p.userId));
+            console.log('User progress loaded:', this.userProgressList.length);
+        },
+        toggleTestUsers() {
+            this.includeTestUsers = !this.includeTestUsers;
+            this.filterProgress();
         },
         formatDate(timestamp) {
             if (!timestamp) return 'No date';
@@ -305,6 +330,12 @@ export default {
     background-color: rgba(255, 68, 68, 0.1);
 }
 
+.control-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
     .progress-header {
         flex-direction: column;
@@ -320,6 +351,11 @@ export default {
     .button-75 {
         width: 100%;
         margin-bottom: 0.5rem;
+    }
+
+    .control-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
 </style>
