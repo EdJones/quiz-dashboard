@@ -121,6 +121,19 @@ export default {
                     },
                     title: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            beforeTitle: function (context) {
+                                const itemId = context[0].dataset.itemIds[context[0].dataIndex];
+                                const quizItem = quizEntries.find(q => q.id === itemId);
+                                return quizItem?.Question || '';
+                            },
+                            label: function (context) {
+                                const value = context.raw;
+                                return `${context.dataset.label}: ${value}%`;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -251,14 +264,16 @@ export default {
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 1,
-                        data: itemAnalysis.map(item => item.errorRate)
+                        data: itemAnalysis.map(item => item.errorRate),
+                        itemIds: itemAnalysis.map(item => item.itemId)
                     },
                     {
                         label: 'Correct',
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
                         borderColor: 'rgb(75, 192, 192)',
                         borderWidth: 1,
-                        data: itemAnalysis.map(item => 100 - item.errorRate)
+                        data: itemAnalysis.map(item => 100 - item.errorRate),
+                        itemIds: itemAnalysis.map(item => item.itemId)
                     }
                 ]
             };
