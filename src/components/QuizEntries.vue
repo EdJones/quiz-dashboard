@@ -1,7 +1,6 @@
 <template>
     <div class="quiz-entries">
-        <h3>Quiz Entries</h3>
-        <button class="button-75" @click="loadQuizEntries">Load Quiz Entries</button>
+        <button class="button-75" @click="loadQuizEntries">Refresh</button>
 
         <div v-if="quizEntriesList.length" class="entries-list">
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
@@ -169,6 +168,9 @@ export default {
             const differences = this.compareEntries(entry, original);
             return Object.keys(differences).length > 0;
         }
+    },
+    mounted() {
+        this.loadQuizEntries();
     }
 }
 </script>
