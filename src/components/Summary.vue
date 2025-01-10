@@ -120,10 +120,18 @@ export default {
                     },
                     title: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' + context.raw + '%';
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
+                        stacked: true,
                         beginAtZero: true,
                         max: 100,
                         ticks: {
@@ -131,6 +139,9 @@ export default {
                                 return value + '%';
                             }
                         }
+                    },
+                    y: {
+                        stacked: true
                     }
                 }
             }
@@ -239,14 +250,14 @@ export default {
                 ),
                 datasets: [
                     {
-                        label: 'Error Rate',
+                        label: 'Incorrect',
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 1,
                         data: itemAnalysis.map(item => item.errorRate)
                     },
                     {
-                        label: 'Success Rate',
+                        label: 'Correct',
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
                         borderColor: 'rgb(75, 192, 192)',
                         borderWidth: 1,
