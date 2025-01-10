@@ -185,7 +185,14 @@ export default {
                     },
                     title: {
                         display: true,
-                        text: 'Incorrect Answer Distribution'
+                        text: ['', ''],
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        },
+                        font: {
+                            size: 12
+                        }
                     }
                 },
                 scales: {
@@ -330,6 +337,12 @@ export default {
         async getAnswerDistribution(itemId) {
             const progress = await getUserProgress();
             const quizItem = quizEntries.find(q => q.id === itemId);
+
+            // Update chart title with quiz item info
+            this.answerChartOptions.plugins.title.text = [
+                quizItem.title || 'Untitled',
+                quizItem.Question || ''
+            ];
 
             // Get all answers for this question
             const answers = progress.flatMap(attempt =>
