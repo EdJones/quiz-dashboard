@@ -49,6 +49,33 @@
                     </div>
                 </div>
             </div>
+
+            <div class="analysis-section">
+                <h3>Frequent Users</h3>
+                <div class="user-engagement-table">
+                    <table v-if="frequentUsers.length">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Total Attempts</th>
+                                <th>Total Questions</th>
+                                <th>Correct %</th>
+                                <th>Quiz Sets Attempted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in frequentUsers" :key="user.userId">
+                                <td>{{ user.userId }}</td>
+                                <td>{{ user.attempts }}</td>
+                                <td>{{ user.totalQuestions }}</td>
+                                <td>{{ user.correctPercentage }}%</td>
+                                <td>{{ user.uniqueQuizSets.join(', ') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div v-else>No frequent users found</div>
+                </div>
+            </div>
         </div>
         <div v-else>
             No summary data found
@@ -83,7 +110,8 @@ ChartJS.register(
 const TEST_USER_IDS = [
     'zaM4S3yvetUssR68ycGC2rM6mf23',  // Ed Laptop
     'I7eOVyCifVfll20Nyb5uZrXnYX22',  // Ed iPhone
-    '2MF5B1lDM5U46QZkfcFXEdQtjK83'   // Ed iPhone
+    '2MF5B1lDM5U46QZkfcFXEdQtjK83',  // Ed iPhone
+    'KmfQrAykhVdK17QbOxSM2RwZdeB3'   // localhost - ed
 ];
 
 export default {
@@ -97,6 +125,7 @@ export default {
             error: null,
             selectedItem: null,
             answerData: null,
+            filteredProgress: [],
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -257,6 +286,40 @@ export default {
                     }
                 ]
             };
+        },
+        frequentUsers() {
+            if (!this.filteredProgress.length) return [];
+
+            // Group progress by user
+            const userStats = {};
+
+            this.filteredProgress.forEach(attempt => {
+                if (!userStats[attempt.userId]) {
+                    userStats[attempt.userId] = {
+                        userId: attempt.userId,
+                        attempts: 0,
+                        totalQuestions: 0,
+                        totalCorrect: 0,
+                        uniqueQuizSets: new Set()
+                    };
+                }
+
+                const stats = userStats[attempt.userId];
+                stats.attempts++;
+                stats.totalQuestions += attempt.userAnswers?.length || 0;
+                stats.totalCorrect += (attempt.userAnswers?.length || 0) - (attempt.incorrectQuestions?.length || 0);
+                stats.uniqueQuizSets.add(attempt.quizId);
+            });
+
+            // Convert to array and filter for frequent users
+            return Object.values(userStats)
+                .filter(user => user.attempts >= 4)
+                .map(user => ({
+                    ...user,
+                    correctPercentage: Math.round((user.totalCorrect / user.totalQuestions) * 100),
+                    uniqueQuizSets: Array.from(user.uniqueQuizSets)
+                }))
+                .sort((a, b) => b.attempts - a.attempts);
         }
     },
     methods: {
@@ -265,9 +328,9 @@ export default {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
 
-                // Filter out test users
-                const filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
-                console.log('Filtered out test users. Remaining entries:', filteredProgress.length);
+                // Filter out test users and store in data
+                this.filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
+                console.log('Filtered out test users. Remaining entries:', this.filteredProgress.length);
 
                 // Analyze by quiz set with item-level analysis
                 const quizSetAnalysis = quizSets
@@ -276,10 +339,10 @@ export default {
                         // Ensure all IDs are parsed as integers
                         const setItems = set.items.map(id => parseInt(id));
 
-                        const setQuestions = filteredProgress.flatMap(attempt =>
+                        const setQuestions = this.filteredProgress.flatMap(attempt =>
                             attempt.userAnswers?.filter(answer =>
                                 setItems.includes(parseInt(answer.questionId))) || []);
-                        const setIncorrect = filteredProgress.flatMap(attempt =>
+                        const setIncorrect = this.filteredProgress.flatMap(attempt =>
                             attempt.incorrectQuestions?.filter(q =>
                                 setItems.includes(parseInt(q.id))) || []);
 
@@ -313,12 +376,12 @@ export default {
                     });
 
                 this.summaryData = {
-                    totalProgress: filteredProgress.length,
-                    totalQuestions: filteredProgress.reduce((sum, attempt) =>
+                    totalProgress: this.filteredProgress.length,
+                    totalQuestions: this.filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.userAnswers?.length || 0), 0),
-                    totalCorrect: filteredProgress.reduce((sum, attempt) =>
+                    totalCorrect: this.filteredProgress.reduce((sum, attempt) =>
                         sum + ((attempt.userAnswers?.length || 0) - (attempt.incorrectQuestions?.length || 0)), 0),
-                    totalIncorrect: filteredProgress.reduce((sum, attempt) =>
+                    totalIncorrect: this.filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.incorrectQuestions?.length || 0), 0),
                     quizSetAnalysis
                 };
@@ -603,5 +666,39 @@ export default {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-engagement-table {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.user-engagement-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.user-engagement-table th,
+.user-engagement-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+.user-engagement-table th {
+    background-color: var(--bg-secondary);
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+
+.user-engagement-table tr:nth-child(even) {
+    background-color: var(--bg-secondary);
+}
+
+.user-engagement-table tr:hover {
+    background-color: var(--hover-bg);
 }
 </style>
