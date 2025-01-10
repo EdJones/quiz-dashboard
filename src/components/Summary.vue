@@ -80,6 +80,12 @@ ChartJS.register(
     Legend
 );
 
+const TEST_USER_IDS = [
+    'zaM4S3yvetUssR68ycGC2rM6mf23',  // Ed Laptop
+    'I7eOVyCifVfll20Nyb5uZrXnYX22',  // Ed iPhone
+    '2MF5B1lDM5U46QZkfcFXEdQtjK83'   // Ed iPhone
+];
+
 export default {
     name: 'Summary',
     components: {
@@ -210,7 +216,27 @@ export default {
     },
     computed: {
         chartData() {
-            if (!this.summaryData?.quizSetAnalysis) return null;
+            if (!this.summaryData?.quizSetAnalysis) {
+                return {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Error Rate',
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 1,
+                            data: []
+                        },
+                        {
+                            label: 'Success Rate',
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgb(75, 192, 192)',
+                            borderWidth: 1,
+                            data: []
+                        }
+                    ]
+                };
+            }
 
             return {
                 labels: this.summaryData.quizSetAnalysis.map(set => set.setName),
@@ -239,54 +265,60 @@ export default {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
 
+                // Filter out test users
+                const filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
+                console.log('Filtered out test users. Remaining entries:', filteredProgress.length);
+
                 // Analyze by quiz set with item-level analysis
-                const quizSetAnalysis = quizSets.map(set => {
-                    // Ensure all IDs are parsed as integers
-                    const setItems = set.items.map(id => parseInt(id));
+                const quizSetAnalysis = quizSets
+                    .filter(set => set.id !== 4)  // Exclude test-expert set
+                    .map(set => {
+                        // Ensure all IDs are parsed as integers
+                        const setItems = set.items.map(id => parseInt(id));
 
-                    const setQuestions = progress.flatMap(attempt =>
-                        attempt.userAnswers?.filter(answer =>
-                            setItems.includes(parseInt(answer.questionId))) || []);
-                    const setIncorrect = progress.flatMap(attempt =>
-                        attempt.incorrectQuestions?.filter(q =>
-                            setItems.includes(parseInt(q.id))) || []);
+                        const setQuestions = filteredProgress.flatMap(attempt =>
+                            attempt.userAnswers?.filter(answer =>
+                                setItems.includes(parseInt(answer.questionId))) || []);
+                        const setIncorrect = filteredProgress.flatMap(attempt =>
+                            attempt.incorrectQuestions?.filter(q =>
+                                setItems.includes(parseInt(q.id))) || []);
 
-                    // Analyze individual items in the set
-                    const itemAnalysis = setItems.map(itemId => {
-                        const itemAttempts = setQuestions.filter(q =>
-                            parseInt(q.questionId) === itemId);
-                        const itemIncorrect = setIncorrect.filter(q =>
-                            parseInt(q.id) === itemId);
+                        // Analyze individual items in the set
+                        const itemAnalysis = setItems.map(itemId => {
+                            const itemAttempts = setQuestions.filter(q =>
+                                parseInt(q.questionId) === itemId);
+                            const itemIncorrect = setIncorrect.filter(q =>
+                                parseInt(q.id) === itemId);
+
+                            return {
+                                itemId,
+                                totalAttempts: itemAttempts.length,
+                                incorrectCount: itemIncorrect.length,
+                                errorRate: itemAttempts.length > 0
+                                    ? Math.round((itemIncorrect.length / itemAttempts.length) * 100)
+                                    : 0
+                            };
+                        });
 
                         return {
-                            itemId,
-                            totalAttempts: itemAttempts.length,
-                            incorrectCount: itemIncorrect.length,
-                            errorRate: itemAttempts.length > 0
-                                ? Math.round((itemIncorrect.length / itemAttempts.length) * 100)
-                                : 0
+                            setName: set.setName,
+                            items: setItems,
+                            totalQuestions: setQuestions.length,
+                            incorrectCount: setIncorrect.length,
+                            errorRate: setQuestions.length > 0
+                                ? Math.round((setIncorrect.length / setQuestions.length) * 100)
+                                : 0,
+                            itemAnalysis
                         };
                     });
 
-                    return {
-                        setName: set.setName,
-                        items: setItems,
-                        totalQuestions: setQuestions.length,
-                        incorrectCount: setIncorrect.length,
-                        errorRate: setQuestions.length > 0
-                            ? Math.round((setIncorrect.length / setQuestions.length) * 100)
-                            : 0,
-                        itemAnalysis
-                    };
-                });
-
                 this.summaryData = {
-                    totalProgress: progress.length,
-                    totalQuestions: progress.reduce((sum, attempt) =>
+                    totalProgress: filteredProgress.length,
+                    totalQuestions: filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.userAnswers?.length || 0), 0),
-                    totalCorrect: progress.reduce((sum, attempt) =>
+                    totalCorrect: filteredProgress.reduce((sum, attempt) =>
                         sum + ((attempt.userAnswers?.length || 0) - (attempt.incorrectQuestions?.length || 0)), 0),
-                    totalIncorrect: progress.reduce((sum, attempt) =>
+                    totalIncorrect: filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.incorrectQuestions?.length || 0), 0),
                     quizSetAnalysis
                 };
@@ -333,6 +365,9 @@ export default {
         },
         async getAnswerDistribution(itemId) {
             const progress = await getUserProgress();
+            // Filter out test users here too
+            const filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
+
             const quizItem = quizEntries.find(q => q.id === itemId);
 
             // Update chart title with quiz item info
@@ -341,8 +376,8 @@ export default {
                 quizItem.Question || ''
             ];
 
-            // Get all answers for this question
-            const answers = progress.flatMap(attempt =>
+            // Get all answers for this question from filtered data
+            const answers = filteredProgress.flatMap(attempt =>
                 attempt.userAnswers?.filter(answer =>
                     parseInt(answer.questionId) === itemId) || []);
 
