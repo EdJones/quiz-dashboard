@@ -333,16 +333,13 @@ export default {
                 console.log('Loading summary data...');
                 const progress = await getUserProgress();
 
-                // Filter out test users and log before/after counts
-                console.log('Total progress entries before filtering:', progress.length);
+                // Filter out test users
                 const filteredProgress = progress.filter(p => !TEST_USER_IDS.includes(p.userId));
-                console.log('Progress entries after filtering test users:', filteredProgress.length);
+                console.log('Filtered out test users. Remaining entries:', filteredProgress.length);
+                this.filteredProgress = filteredProgress;  // Store for other computations
 
                 // Get unique users (excluding test users)
-                const uniqueUsersBefore = new Set(progress.map(p => p.userId)).size;
-                const uniqueUsersAfter = new Set(filteredProgress.map(p => p.userId)).size;
-                console.log('Unique users before filtering:', uniqueUsersBefore);
-                console.log('Unique users after filtering:', uniqueUsersAfter);
+                const uniqueUsers = new Set(filteredProgress.map(p => p.userId)).size;
 
                 // Analyze by quiz set with item-level analysis
                 const quizSetAnalysis = quizSets
@@ -388,7 +385,7 @@ export default {
                     });
 
                 this.summaryData = {
-                    uniqueUsers: uniqueUsersAfter,  // Make sure we're using the filtered count
+                    uniqueUsers: uniqueUsers,
                     totalProgress: filteredProgress.length,
                     totalQuestions: filteredProgress.reduce((sum, attempt) =>
                         sum + (attempt.userAnswers?.length || 0), 0),
