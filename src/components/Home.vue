@@ -35,7 +35,7 @@
             <button class="tab-button" :class="{ active: activeTab === 'entries' }" @click="activeTab = 'entries'">
                 Quiz Entries
             </button>
-            <router-link to="/create-issue" class="button-75">Issues</router-link>
+            <router-link to="/create-issue" class="tab-button">Issues</router-link>
 
         </div>
 
@@ -815,7 +815,7 @@ h1 {
 
 @media screen and (max-width: 480px) {
     .tab-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.5rem;
         margin: 1rem auto;
         padding: 0.5rem;
@@ -824,7 +824,7 @@ h1 {
     .tab-button {
         width: 100%;
         max-width: none;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem .5rem;
         font-size: 0.9rem;
         display: flex;
         align-items: center;
