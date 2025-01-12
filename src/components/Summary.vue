@@ -557,7 +557,14 @@ export default {
     color: var(--text-secondary);
 }
 
-/* Button Styling */
+/* Button container */
+.control-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Button styling */
 .button-75 {
     padding: 0.75rem 1.5rem;
     border: 1px solid var(--border-color);
@@ -570,7 +577,40 @@ export default {
     font-weight: 500;
     text-decoration: none;
     display: inline-block;
-    margin-bottom: 1rem;
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    flex: 1;
+    /* Make buttons equal width */
+}
+
+@media screen and (max-width: 480px) {
+    .control-buttons {
+        flex-direction: column;
+        /* Stack buttons vertically */
+        gap: 0.5rem;
+        /* Reduce gap between buttons */
+    }
+
+    .button-75 {
+        width: 100%;
+        /* Full width on mobile */
+        padding: 0.75rem 1rem;
+        /* Slightly less horizontal padding */
+        font-size: 0.9rem;
+        /* Slightly smaller font */
+        text-align: center;
+        /* Center the text */
+        white-space: normal;
+        /* Allow text to wrap if needed */
+        min-height: 44px;
+        /* Ensure consistent height and touchability */
+        display: flex;
+        /* For vertical centering */
+        align-items: center;
+        /* Center text vertically */
+        justify-content: center;
+        /* Center text horizontally */
+    }
 }
 
 .button-75:hover {
