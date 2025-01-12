@@ -777,7 +777,6 @@ h1 {
 .tab-container {
     display: flex;
     gap: 1.5rem;
-    /* Increased gap between buttons */
     margin: 2rem auto;
     max-width: 800px;
     padding: 0.5rem;
@@ -799,6 +798,7 @@ h1 {
     overflow: hidden;
     font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .tab-button:hover {
@@ -813,15 +813,24 @@ h1 {
     box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
 }
 
-.tab-button.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 2px;
+@media screen and (max-width: 480px) {
+    .tab-container {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1rem auto;
+        padding: 0.5rem;
+    }
+
+    .tab-button {
+        width: 100%;
+        max-width: none;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
 }
 
 /* Adjust the Issues button to match */
