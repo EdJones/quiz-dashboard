@@ -824,7 +824,7 @@ h1 {
     .tab-button {
         width: 100%;
         max-width: none;
-        padding: 0.75rem .5rem;
+        padding: 0.5rem .5rem;
         font-size: 0.9rem;
         display: flex;
         align-items: center;
