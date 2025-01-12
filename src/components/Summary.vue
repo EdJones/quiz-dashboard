@@ -520,22 +520,22 @@ export default {
 
 <style scoped>
 .summary {
-    padding: 1rem;
+    margin-top: 1rem;
 }
 
 .summary-content {
     margin-top: 1rem;
-    display: grid;
+    display: flex;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    flex-wrap: wrap;
 }
 
 .summary-card {
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 1.25rem;
-    width: 100%;
+    padding: 1.5rem;
+    min-width: 200px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -557,14 +557,7 @@ export default {
     color: var(--text-secondary);
 }
 
-/* Button container */
-.control-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-/* Button styling */
+/* Button Styling */
 .button-75 {
     padding: 0.75rem 1.5rem;
     border: 1px solid var(--border-color);
@@ -576,9 +569,8 @@ export default {
     font-size: 1rem;
     font-weight: 500;
     text-decoration: none;
-    flex: 1;
-    text-align: center;
-    min-width: fit-content;
+    display: inline-block;
+    margin-bottom: 1rem;
 }
 
 .button-75:hover {
@@ -601,8 +593,6 @@ export default {
 }
 
 .analysis-section {
-    grid-column: 1 / -1;
-    /* Span all columns */
     width: 100%;
     margin-top: 2rem;
     padding-top: 1rem;
@@ -643,7 +633,6 @@ export default {
     }
 }
 
-/* Chart containers */
 .chart-container {
     width: 100%;
     height: 400px;
@@ -655,6 +644,12 @@ export default {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+    }
+}
+
 .item-chart-container {
     width: 100%;
     height: 300px;
@@ -664,6 +659,12 @@ export default {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .item-chart-container {
+        height: 400px;
+    }
 }
 
 .answer-chart-container {
@@ -709,50 +710,5 @@ export default {
 
 .user-engagement-table tr:hover {
     background-color: var(--hover-bg);
-}
-
-/* Mobile specific adjustments */
-@media screen and (max-width: 480px) {
-
-    /* Only apply to phone-sized screens */
-    .summary {
-        padding: 0.5rem;
-    }
-
-    .summary-content {
-        grid-template-columns: 1fr;
-    }
-
-    .control-buttons {
-        flex-direction: column;
-    }
-
-    .button-75 {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
-
-    .summary-card {
-        padding: 1rem;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-    }
-
-    .stat-label {
-        font-size: 0.85rem;
-    }
-
-    .chart-container {
-        height: 300px;
-        /* Smaller height only on phones */
-    }
-
-    .item-chart-container {
-        height: 400px;
-        /* Taller for item charts on phones */
-    }
 }
 </style>
