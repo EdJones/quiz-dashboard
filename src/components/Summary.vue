@@ -611,6 +611,11 @@ export default {
         justify-content: center;
         /* Center text horizontally */
     }
+
+    .summary-card {
+        padding: .8rem;
+        min-width: 40%;
+    }
 }
 
 .button-75:hover {
