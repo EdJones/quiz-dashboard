@@ -140,6 +140,10 @@ export default {
             return quizEntries.find(entry => entry.id === parseInt(originalId));
         },
         compareEntries(draft, original) {
+            if (!original || !draft) {
+                return {};
+            }
+
             const differences = {};
             const fieldsToCompare = [
                 'title', 'subtitle', 'Question', 'questionP2',
@@ -149,7 +153,8 @@ export default {
             ];
 
             fieldsToCompare.forEach(field => {
-                if (draft[field] !== original[field] &&
+                if (field in draft && field in original &&
+                    draft[field] !== original[field] &&
                     (draft[field] || original[field])) {
                     differences[field] = {
                         draft: draft[field],
@@ -161,7 +166,7 @@ export default {
             return differences;
         },
         hasDifferences(entry) {
-            if (!entry.originalId) return false;
+            if (!entry?.originalId) return false;
             const original = this.getOriginalEntry(entry.originalId);
             if (!original) return false;
 
