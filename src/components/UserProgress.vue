@@ -14,8 +14,7 @@
                         <span class="timestamp">{{ formatDate(progress.lastUpdated) }}</span><br>
                         User {{ getUserDisplayName(progress.userId) }}<br>
                         Quiz {{ progress.quizId }} - {{ getQuizTitle(progress.quizId) }}<br>
-                        ({{ progress.userAnswers.length - progress.incorrectQuestions.length }} of {{
-                            progress.userAnswers.length }} correct)<br>
+                        ({{ getCorrectAnswerCount(progress) }} of {{ progress.userAnswers?.length || 0 }} correct)<br>
                     </p>
                 </div>
 
@@ -84,7 +83,9 @@ const TEST_USER_IDS = [
     'zaM4S3yvetUssR68ycGC2rM6mf23',  // Ed Laptop
     'I7eOVyCifVfll20Nyb5uZrXnYX22',  // Ed iPhone
     '2MF5B1lDM5U46QZkfcFXEdQtjK83',  // Ed iPhone
-    'KmfQrAykhVdK17QbOxSM2RwZdeB3'   // localhost - ed
+    'KmfQrAykhVdK17QbOxSM2RwZdeB3',  // localhost - ed
+    '3MbjAzyDZqXtrmE5AclsIiWy3hX2',  // vercel - ed
+    '6wV6GSAkLNUMIxostc4pjQ5AWzx1'  // vercel - ed
 ];
 
 export default {
@@ -169,6 +170,11 @@ export default {
             if (!questionId || !selectedAnswer) return false;
             const quizItem = quizEntries.find(item => item.id === questionId);
             return quizItem && parseInt(quizItem.correctAnswer) !== parseInt(selectedAnswer);
+        },
+        getCorrectAnswerCount(progress) {
+            const totalAnswers = progress.userAnswers?.length || 0;
+            const incorrectCount = progress.incorrectQuestions?.length || 0;
+            return totalAnswers - incorrectCount;
         }
     },
     mounted() {

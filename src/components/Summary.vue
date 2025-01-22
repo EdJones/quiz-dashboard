@@ -116,7 +116,8 @@ const TEST_USER_IDS = [
     'zaM4S3yvetUssR68ycGC2rM6mf23',  // Ed Laptop
     'I7eOVyCifVfll20Nyb5uZrXnYX22',  // Ed iPhone
     '2MF5B1lDM5U46QZkfcFXEdQtjK83',  // Ed iPhone
-    'KmfQrAykhVdK17QbOxSM2RwZdeB3'   // localhost - ed
+    'KmfQrAykhVdK17QbOxSM2RwZdeB3',  // localhost - ed
+    '3MbjAzyDZqXtrmE5AclsIiWy3hX2'  // vercel - ed
 ];
 
 export default {
