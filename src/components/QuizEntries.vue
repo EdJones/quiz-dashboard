@@ -224,7 +224,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1rem;
+    margin-bottom: 0rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -395,7 +395,6 @@ export default {
     align-items: baseline;
     padding: 0.25rem;
     text-align: left;
-    width: 100%;
 }
 
 .diff-label {
