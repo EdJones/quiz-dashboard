@@ -1,6 +1,15 @@
 <template>
     <div class="quiz-entries">
-        <button class="button-75" @click="loadQuizEntries">Refresh</button>
+        <div class="control-buttons">
+            <button class="button-75" @click="loadQuizEntries">Refresh</button>
+            <select v-model="statusFilter" class="status-select">
+                <option value="all">All Entries</option>
+                <option value="draft">Drafts</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
 
         <div v-if="quizEntriesList.length" class="entries-list">
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
@@ -112,12 +121,24 @@ export default {
         return {
             quizEntriesList: [],
             entriesError: null,
-            db: sorQuizzesDb
+            db: sorQuizzesDb,
+            statusFilter: 'all'
         }
     },
     computed: {
         sortedEntries() {
-            return [...this.quizEntriesList].sort((a, b) => {
+            let filtered = [...this.quizEntriesList];
+
+            // Apply status filter
+            if (this.statusFilter !== 'all') {
+                if (this.statusFilter === 'draft') {
+                    filtered = filtered.filter(entry => !entry.status || entry.status === 'draft');
+                } else {
+                    filtered = filtered.filter(entry => entry.status === this.statusFilter);
+                }
+            }
+
+            return filtered.sort((a, b) => {
                 const dateA = a.timestamp?.toDate() || new Date(0);
                 const dateB = b.timestamp?.toDate() || new Date(0);
                 return dateB - dateA;
