@@ -6,9 +6,12 @@
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
                 <div class="entry-header">
                     <div class="entry-title">
-                        <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{ entry.originalId }}</strong>
+                        <h4>
+                            {{ entry.title }}
+                            <span v-if="entry.originalId" class="edit-label">
+                                (Edit of #{{ entry.originalId }})
+                            </span>
                         </h4>
-                        <h4 v-else>Suggested New Quiz Entry</h4>
                         <span class="status-badge" :class="entry.status">{{ entry.status || 'pending' }}</span>
                     </div>
                     <div class="entry-metadata">
@@ -27,9 +30,6 @@
                     </div>
                 </div>
                 <div class="entry-details">
-                    <div class="detail-row">
-                        <strong>Title:</strong> {{ entry.title }}
-                    </div>
                     <div class="detail-row">
                         <strong>Question:</strong> {{ getQuestionText(entry) }}
                     </div>
@@ -279,48 +279,49 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    align-items: flex-start;
+    width: 100%;
 }
 
 .detail-row {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
+    width: 100%;
+    align-items: flex-start;
 }
 
 .detail-row strong {
     color: var(--text-secondary);
     font-size: 0.9rem;
     min-width: 100px;
+    text-align: left;
 }
 
 .detail-row ul {
-    margin: 0.5rem 0;
+    margin: 0.25rem 0;
     padding-left: 1.5rem;
     list-style: none;
+    width: 100%;
+    font-size: 0.9rem;
 }
 
 .detail-row li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     padding: 0.25rem;
     position: relative;
+    text-align: left;
+    line-height: 1.2;
 }
 
-.detail-row li:before {
-    content: "";
-    position: absolute;
-    left: -1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--text-secondary);
+.detail-row li:last-child {
+    margin-bottom: 0;
 }
 
 .correct-option {
     background-color: rgba(127, 255, 212, 0.3);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
+    border: 2px solid #4caf50;
 }
 
 .correct-option:before {
@@ -357,6 +358,8 @@ export default {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+    width: 100%;
+    text-align: left;
 }
 
 .comparison-header h4 {
@@ -370,6 +373,8 @@ export default {
     padding: 0.75rem;
     border-radius: 4px;
     margin: 0.5rem 0;
+    width: 100%;
+    text-align: left;
 }
 
 .diff-view {
@@ -380,6 +385,7 @@ export default {
     background-color: var(--bg-primary);
     border-radius: 4px;
     padding: 0.5rem;
+    width: 100%;
 }
 
 .original,
@@ -388,6 +394,8 @@ export default {
     gap: 0.5rem;
     align-items: baseline;
     padding: 0.25rem;
+    text-align: left;
+    width: 100%;
 }
 
 .diff-label {
@@ -429,6 +437,12 @@ export default {
     font-size: 0.9em;
 }
 
+/* Ensure feedback section is also left-aligned */
+.feedback-section {
+    text-align: left;
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     .entry-header {
         flex-direction: column;
@@ -455,5 +469,23 @@ export default {
     .diff-label {
         min-width: 60px;
     }
+}
+
+.edit-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.detail-row li:before {
+    content: "";
+    position: absolute;
+    left: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
 }
 </style>
