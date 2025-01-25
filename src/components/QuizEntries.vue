@@ -62,9 +62,9 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="detail-row">
+                    <!-- <  div class="detail-row">
                         <strong>Correct Answer:</strong> {{ entry.correctAnswer }}
-                    </div>
+                    </div> -->
 
                     <template v-if="entry.originalId">
                         <div class="comparison-header" v-if="hasDifferences(entry)">
