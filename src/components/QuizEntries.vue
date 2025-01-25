@@ -9,12 +9,16 @@
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
+            <button v-if="selectedEntries.length > 0" class="button-75 delete-button" @click="confirmDelete">
+                Delete Selected ({{ selectedEntries.length }})
+            </button>
         </div>
 
         <div v-if="quizEntriesList.length" class="entries-list">
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
                 <div class="entry-header">
                     <div class="entry-title">
+                        <input type="checkbox" :value="entry.id" v-model="selectedEntries" class="entry-checkbox">
                         <h4>
                             {{ entry.title }}
                             <span v-if="entry.originalId" class="edit-label">
@@ -122,7 +126,8 @@ export default {
             quizEntriesList: [],
             entriesError: null,
             db: sorQuizzesDb,
-            statusFilter: 'all'
+            statusFilter: 'all',
+            selectedEntries: [],
         }
     },
     computed: {
@@ -208,6 +213,21 @@ export default {
 
             const differences = this.compareEntries(entry, original);
             return Object.keys(differences).length > 0;
+        },
+        confirmDelete() {
+            if (confirm(`Are you sure you want to delete ${this.selectedEntries.length} entries?`)) {
+                this.deleteSelectedEntries();
+            }
+        },
+        async deleteSelectedEntries() {
+            try {
+                console.log('Deleting entries:', this.selectedEntries);
+                this.selectedEntries = [];
+                await this.loadQuizEntries();
+            } catch (error) {
+                console.error('Error deleting entries:', error);
+                this.error = error.message;
+            }
         }
     },
     mounted() {
@@ -489,6 +509,11 @@ export default {
     .diff-label {
         min-width: 60px;
     }
+
+    .entry-checkbox {
+        width: 24px;
+        height: 24px;
+    }
 }
 
 .edit-label {
@@ -507,5 +532,23 @@ export default {
     height: 6px;
     border-radius: 50%;
     background-color: var(--text-secondary);
+}
+
+.entry-checkbox {
+    margin-right: 0.5rem;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: var(--danger-bg, #f8d7da);
+    color: var(--danger-text, #721c24);
+    border-color: var(--danger-text, #721c24);
+}
+
+.delete-button:hover {
+    background-color: var(--danger-text, #721c24);
+    color: white;
 }
 </style>
