@@ -105,8 +105,8 @@
                 </div>
             </div>
         </div>
-        <div v-else-if="entriesError" class="error">
-            {{ entriesError }}
+        <div v-else-if="error" class="error">
+            {{ error }}
         </div>
         <div v-else>
             No quiz entries found
@@ -115,8 +115,8 @@
 </template>
 
 <script>
-import { collection, getDocs } from 'firebase/firestore';
-import { sorQuizzesDb } from '../firebase';
+import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { sorQuizzesDb } from '../firebase';  // Import using the exported name
 import { quizEntries } from '../data/quiz-items';
 
 export default {
@@ -124,10 +124,10 @@ export default {
     data() {
         return {
             quizEntriesList: [],
-            entriesError: null,
-            db: sorQuizzesDb,
+            error: null,
             statusFilter: 'all',
             selectedEntries: [],
+            db: sorQuizzesDb,  // Use the imported db
         }
     },
     computed: {
@@ -166,9 +166,11 @@ export default {
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                console.log('Loaded entries:', this.quizEntriesList.length);
             } catch (error) {
                 console.error('Error loading quiz entries:', error);
-                this.entriesError = error.message;
+                this.error = error.message;
             }
         },
         getQuestionText(entry) {
@@ -221,7 +223,36 @@ export default {
         },
         async deleteSelectedEntries() {
             try {
-                console.log('Deleting entries:', this.selectedEntries);
+                console.log('Selected entries:', this.selectedEntries);
+
+                const validEntries = this.selectedEntries.filter(id => id != null);
+                console.log('Valid entries to delete:', validEntries);
+
+                if (validEntries.length === 0) {
+                    throw new Error('No valid entries selected for deletion');
+                }
+
+                // Delete each selected entry
+                for (const entryId of validEntries) {
+                    console.log('Attempting to delete entry:', entryId);
+                    const entriesRef = collection(this.db, 'quizEntries');
+                    const docRef = doc(entriesRef, String(entryId));
+
+                    // Try to delete
+                    await deleteDoc(docRef);
+
+                    // Verify deletion
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        throw new Error(`Failed to delete entry ${entryId} - document still exists`);
+                    } else {
+                        console.log(`Successfully deleted entry ${entryId} - verified`);
+                    }
+                }
+
+                console.log('All entries deleted and verified');
+
+                // Clear selection and refresh the list
                 this.selectedEntries = [];
                 await this.loadQuizEntries();
             } catch (error) {
