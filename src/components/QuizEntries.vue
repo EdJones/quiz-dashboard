@@ -5,11 +5,26 @@
         <div v-if="quizEntriesList.length" class="entries-list">
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
                 <div class="entry-header">
-                    <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{ entry.originalId }}</strong></h4>
-                    <h4 v-else>Suggested New Quiz Entry</h4>
-                    <span>ID: {{ entry.id }}</span>
-                    <span>Quiz ID: {{ entry.quizId }}</span>
-                    <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+                    <div class="entry-title">
+                        <h4 v-if="entry.originalId">Proposed Edit of quiz-item <strong>{{ entry.originalId }}</strong>
+                        </h4>
+                        <h4 v-else>Suggested New Quiz Entry</h4>
+                        <span class="status-badge" :class="entry.status">{{ entry.status || 'pending' }}</span>
+                    </div>
+                    <div class="entry-metadata">
+                        <div class="metadata-row">
+                            <span class="metadata-label">ID:</span>
+                            <span>{{ entry.id }}</span>
+                        </div>
+                        <div class="metadata-row">
+                            <span class="metadata-label">Submitted:</span>
+                            <span>{{ formatDate(entry.timestamp) }}</span>
+                        </div>
+                        <div class="metadata-row">
+                            <span class="metadata-label">By:</span>
+                            <span>{{ entry.isAnonymous ? 'Anonymous' : entry.userEmail }}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="entry-details">
                     <div class="detail-row">
@@ -207,22 +222,57 @@ export default {
 
 .entry-header {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
 }
 
-.entry-header h4 {
-    margin: 0;
-    color: var(--text-primary);
+.entry-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.entry-header span {
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status-badge.pending {
+    background-color: var(--warning-bg, #fff3cd);
+    color: var(--warning-text, #856404);
+}
+
+.status-badge.approved {
+    background-color: var(--success-bg, #d4edda);
+    color: var(--success-text, #155724);
+}
+
+.status-badge.rejected {
+    background-color: var(--danger-bg, #f8d7da);
+    color: var(--danger-text, #721c24);
+}
+
+.entry-metadata {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     font-size: 0.9rem;
+}
+
+.metadata-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.metadata-label {
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .entry-details {
@@ -381,7 +431,12 @@ export default {
 
 @media (max-width: 768px) {
     .entry-header {
-        font-size: 0.9rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .entry-metadata {
+        font-size: 0.8rem;
     }
 
     .button-75 {
