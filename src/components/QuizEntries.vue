@@ -82,22 +82,25 @@
 
                     <template v-if="entry.originalId">
                         <div class="comparison-section">
-                            <h4>Changes from Original:</h4>
+                            <h4>Content and Changes:</h4>
                             <div v-for="(diff, field) in differences[entry.id] || {}" :key="field" class="diff-row">
                                 <strong>{{ field }}:</strong>
                                 <div class="diff-content">
-                                    <div v-if="diff.unchanged" class="unchanged">
-                                        <span class="diff-label">Status:</span>
-                                        <span class="diff-content">Unchanged</span>
-                                    </div>
-                                    <template v-else>
+                                    <!-- Only show comparison if there's a change -->
+                                    <template v-if="!diff.unchanged">
                                         <div class="original">
-                                            <span class="diff-label">Original:</span>
+                                            <span class="diff-label">Was:</span>
                                             <span class="diff-content">{{ diff.original || 'empty' }}</span>
                                         </div>
                                         <div class="current">
-                                            <span class="diff-label">Current:</span>
+                                            <span class="diff-label">Now:</span>
                                             <span class="diff-content">{{ diff.current || 'empty' }}</span>
+                                        </div>
+                                    </template>
+                                    <!-- Always show current content -->
+                                    <template v-else>
+                                        <div class="current-content">
+                                            {{ diff.current }}
                                         </div>
                                     </template>
                                 </div>
@@ -268,15 +271,13 @@ export default {
                     current: entry[field]
                 });
 
-                if (entry[field] === original[field]) {
-                    differences[field] = { unchanged: true };
-                } else {
-                    differences[field] = {
-                        original: original[field],
-                        current: entry[field],
-                        unchanged: false
-                    };
-                }
+                // Store both values regardless of whether they're different
+                differences[field] = {
+                    original: original[field],
+                    current: entry[field],
+                    unchanged: entry[field] === original[field]
+                };
+
                 console.log(`Field ${field}:`, differences[field]);
             }
 
@@ -514,9 +515,14 @@ export default {
     color: var(--success-text, #28a745);
 }
 
+.current-content {
+    padding: 0.25rem 0.5rem;
+    color: var(--text-primary);
+}
+
 .diff-label {
     font-weight: 500;
-    min-width: 70px;
+    min-width: 50px;
     font-size: 0.9rem;
 }
 
@@ -612,16 +618,5 @@ export default {
 .delete-button:hover {
     background-color: var(--danger-text, #721c24);
     color: white;
-}
-
-.unchanged {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background-color: var(--info-bg-light, #f8f9fa);
-    color: var(--text-secondary, #6c757d);
-    font-style: italic;
 }
 </style>
