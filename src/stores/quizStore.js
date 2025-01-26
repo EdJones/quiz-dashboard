@@ -157,6 +157,28 @@ export const quizStore = defineStore('quiz', {
         },
         canDeleteEntries() {
             return auth.currentUser?.email === 'ed.jones@gmail.com';
+        },
+        copyQuizEntry(originalEntry) {
+            console.log('Original entry before copy:', originalEntry);
+
+            // Create a copy of the entry and set the originalId
+            const { id, timestamp, ...entryWithoutIdAndTimestamp } = originalEntry;
+
+            const copiedEntry = {
+                ...this.draftQuizEntry,  // Start with default values
+                ...entryWithoutIdAndTimestamp,  // Copy over original values except id and timestamp
+                originalId: originalEntry.id,  // Store the full document ID
+            };
+
+            console.log('Final copied entry:', {
+                originalId: originalEntry.id,
+                newEntry: copiedEntry
+            });
+
+            // Update the draft entry
+            this.updateDraftQuizEntry(copiedEntry);
+
+            return copiedEntry;
         }
     },
 });

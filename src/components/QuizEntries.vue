@@ -83,17 +83,23 @@
                     <template v-if="entry.originalId">
                         <div class="comparison-section">
                             <h4>Changes from Original:</h4>
-                            <div v-for="(diff, field) in getDifferences(entry)" :key="field" class="diff-row">
+                            <div v-for="(diff, field) in differences" :key="field" class="diff-row">
                                 <strong>{{ field }}:</strong>
                                 <div class="diff-content">
-                                    <div class="original">
-                                        <span class="diff-label">Original:</span>
-                                        <span class="diff-content">{{ diff.original || 'empty' }}</span>
+                                    <div v-if="diff.unchanged" class="unchanged">
+                                        <span class="diff-label">Status:</span>
+                                        <span class="diff-content">Unchanged</span>
                                     </div>
-                                    <div class="current">
-                                        <span class="diff-label">Current:</span>
-                                        <span class="diff-content">{{ diff.current || 'empty' }}</span>
-                                    </div>
+                                    <template v-else>
+                                        <div class="original">
+                                            <span class="diff-label">Original:</span>
+                                            <span class="diff-content">{{ diff.original || 'empty' }}</span>
+                                        </div>
+                                        <div class="current">
+                                            <span class="diff-label">Current:</span>
+                                            <span class="diff-content">{{ diff.current || 'empty' }}</span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -130,6 +136,7 @@ export default {
             error: null,
             statusFilter: 'all',
             selectedEntries: [],
+            differences: {},
         }
     },
     computed: {
@@ -153,6 +160,13 @@ export default {
         },
         showDeleteButton() {
             return this.store.canDeleteEntries();
+        }
+    },
+    watch: {
+        async 'entry.originalId'(newId) {
+            if (newId) {
+                this.differences = await this.getDifferences(this.entry);
+            }
         }
     },
     methods: {
@@ -185,22 +199,52 @@ export default {
             return entry.option1 || entry.option2 || entry.option3 || entry.option4 || entry.option5;
         },
         async loadOriginalEntry(originalId) {
+            console.log('Loading original entry with ID:', originalId);
             try {
+                // First check the static quiz-items array using the numeric ID
+                const staticEntry = quizEntries.find(entry => entry.id === parseInt(originalId));
+                if (staticEntry) {
+                    console.log('Found in static entries:', staticEntry);
+                    return staticEntry;
+                }
+
+                console.log('Not found in static entries, trying Firestore...');
+                // If not found in static array, try Firestore (for drafts of drafts)
                 const docRef = doc(sorQuizzesDb, 'quizEntries', originalId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    return { id: docSnap.id, ...docSnap.data() };
+                    const firestoreEntry = { id: docSnap.id, ...docSnap.data() };
+                    console.log('Found in Firestore:', firestoreEntry);
+                    return firestoreEntry;
                 }
+
+                console.log('Entry not found in either location');
                 return null;
             } catch (error) {
                 console.error('Error loading original entry:', error);
                 return null;
             }
         },
-        getDifferences(entry) {
-            const original = this.loadOriginalEntry(entry.originalId);
+        async getDifferences(entry) {
+            console.log('Getting differences for entry:', {
+                id: entry.id,
+                originalId: entry.originalId,
+                title: entry.title
+            });
+
+            if (!entry.originalId) {
+                console.log('No originalId found');
+                return {};
+            }
+
+            const original = await this.loadOriginalEntry(entry.originalId);
             if (!original) return {};
+
+            console.log('Comparing entries:', {
+                original: { id: original.id, title: original.title },
+                current: { id: entry.id, title: entry.title }
+            });
 
             const differences = {};
             const fieldsToCompare = [
@@ -210,12 +254,21 @@ export default {
             ];
 
             for (const field of fieldsToCompare) {
-                if (entry[field] !== original[field]) {
+                console.log(`Comparing field ${field}:`, {
+                    original: original[field],
+                    current: entry[field]
+                });
+
+                if (entry[field] === original[field]) {
+                    differences[field] = { unchanged: true };
+                } else {
                     differences[field] = {
                         original: original[field],
-                        current: entry[field]
+                        current: entry[field],
+                        unchanged: false
                     };
                 }
+                console.log(`Field ${field}:`, differences[field]);
             }
 
             return differences;
@@ -235,7 +288,10 @@ export default {
             }
         }
     },
-    mounted() {
+    async mounted() {
+        if (this.entry?.originalId) {
+            this.differences = await this.getDifferences(this.entry);
+        }
         this.loadQuizEntries();
     }
 }
@@ -547,5 +603,16 @@ export default {
 .delete-button:hover {
     background-color: var(--danger-text, #721c24);
     color: white;
+}
+
+.unchanged {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--info-bg-light, #f8f9fa);
+    color: var(--text-secondary, #6c757d);
+    font-style: italic;
 }
 </style>
