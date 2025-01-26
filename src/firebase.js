@@ -10,7 +10,9 @@ import {
     orderBy,
     serverTimestamp,
     addDoc,
-    where
+    where,
+    deleteDoc,
+    getDoc
 } from "firebase/firestore";
 import {
     getAuth,
@@ -261,3 +263,27 @@ console.log('SORQuizzes DB initialized with project:', firebaseConfig1.projectId
 
 // Export both databases and auth
 export { db1 as sorQuizzesDb, db2 as dashboardDb, auth, analytics };
+
+export const deleteQuizEntry = async (entryId) => {
+    try {
+        // Check authorization
+        if (auth.currentUser?.email !== 'ed.jones@gmail.com') {
+            throw new Error('Unauthorized: Only ed.jones@gmail.com can delete entries');
+        }
+
+        const docRef = doc(db1, 'quizEntries', String(entryId));
+        await deleteDoc(docRef);
+
+        // Verify deletion
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            throw new Error(`Failed to delete entry ${entryId} - document still exists`);
+        }
+
+        console.log(`Successfully deleted entry ${entryId} - verified`);
+        return true;
+    } catch (error) {
+        console.error('Error deleting quiz entry:', error);
+        throw error;
+    }
+};

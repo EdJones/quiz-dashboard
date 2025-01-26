@@ -1,11 +1,10 @@
 // src/stores/quizStore.js
 import { defineStore } from 'pinia';
-import { auth, sorQuizzesDb as db } from '../firebase';
+import { auth, sorQuizzesDb as db, deleteQuizEntry } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 export const quizStore = defineStore('quiz', {
     state: () => ({
-
         quizEdits: [],
         userAnswers: [], // Will now store objects instead of just answer values
         currentQuizId: null,
@@ -57,11 +56,10 @@ export const quizStore = defineStore('quiz', {
             type: '', // 'success' or 'error'
             show: false
         },
-        incorrectQuestions: []  // Changed from incorrectQuestionIds to store more info
+        incorrectQuestions: [],  // Changed from incorrectQuestionIds to store more info
+        deleteError: null
     }),
     actions: {
-
-
         setUserAnswers(answers) {
             this.userAnswers = answers; // Update user answers
         },
@@ -131,7 +129,6 @@ export const quizStore = defineStore('quiz', {
             this.userAnswers = []; // Reset answers when starting new quiz
             this.incorrectQuestions = [];  // Reset incorrect questions
         },
-
         async recordQuizEdit(quizStarted) {
             const quizEdit = {
                 timestamp: new Date(),
@@ -146,5 +143,20 @@ export const quizStore = defineStore('quiz', {
                 throw e;
             }
         },
+        async deleteQuizEntries(entryIds) {
+            this.deleteError = null;
+            try {
+                for (const entryId of entryIds) {
+                    await deleteQuizEntry(entryId);
+                }
+                return true;
+            } catch (error) {
+                this.deleteError = error.message;
+                throw error;
+            }
+        },
+        canDeleteEntries() {
+            return auth.currentUser?.email === 'ed.jones@gmail.com';
+        }
     },
 });

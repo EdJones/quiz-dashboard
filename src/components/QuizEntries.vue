@@ -9,7 +9,8 @@
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
-            <button v-if="selectedEntries.length > 0" class="button-75 delete-button" @click="confirmDelete">
+            <button v-if="selectedEntries.length > 0 && showDeleteButton" class="button-75 delete-button"
+                @click="confirmDelete">
                 Delete Selected ({{ selectedEntries.length }})
             </button>
         </div>
@@ -118,16 +119,22 @@
 import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { sorQuizzesDb } from '../firebase';  // Import using the exported name
 import { quizEntries } from '../data/quiz-items';
+import { quizStore } from '../stores/quizStore';
+import { storeToRefs } from 'pinia';
 
 export default {
     name: 'QuizEntries',
+    setup() {
+        const store = quizStore();
+        const { deleteError } = storeToRefs(store);
+        return { store, deleteError };
+    },
     data() {
         return {
             quizEntriesList: [],
             error: null,
             statusFilter: 'all',
             selectedEntries: [],
-            db: sorQuizzesDb,  // Use the imported db
         }
     },
     computed: {
@@ -148,6 +155,9 @@ export default {
                 const dateB = b.timestamp?.toDate() || new Date(0);
                 return dateB - dateA;
             });
+        },
+        showDeleteButton() {
+            return this.store.canDeleteEntries();
         }
     },
     methods: {
@@ -159,7 +169,7 @@ export default {
         async loadQuizEntries() {
             try {
                 console.log('Loading quiz entries...');
-                const entriesRef = collection(this.db, 'quizEntries');
+                const entriesRef = collection(sorQuizzesDb, 'quizEntries');
                 const querySnapshot = await getDocs(entriesRef);
 
                 this.quizEntriesList = querySnapshot.docs.map(doc => ({
@@ -223,40 +233,10 @@ export default {
         },
         async deleteSelectedEntries() {
             try {
-                console.log('Selected entries:', this.selectedEntries);
-
-                const validEntries = this.selectedEntries.filter(id => id != null);
-                console.log('Valid entries to delete:', validEntries);
-
-                if (validEntries.length === 0) {
-                    throw new Error('No valid entries selected for deletion');
-                }
-
-                // Delete each selected entry
-                for (const entryId of validEntries) {
-                    console.log('Attempting to delete entry:', entryId);
-                    const entriesRef = collection(this.db, 'quizEntries');
-                    const docRef = doc(entriesRef, String(entryId));
-
-                    // Try to delete
-                    await deleteDoc(docRef);
-
-                    // Verify deletion
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        throw new Error(`Failed to delete entry ${entryId} - document still exists`);
-                    } else {
-                        console.log(`Successfully deleted entry ${entryId} - verified`);
-                    }
-                }
-
-                console.log('All entries deleted and verified');
-
-                // Clear selection and refresh the list
+                await this.store.deleteQuizEntries(this.selectedEntries);
                 this.selectedEntries = [];
                 await this.loadQuizEntries();
             } catch (error) {
-                console.error('Error deleting entries:', error);
                 this.error = error.message;
             }
         }
