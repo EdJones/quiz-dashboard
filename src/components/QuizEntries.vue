@@ -83,7 +83,7 @@
                     <template v-if="entry.originalId">
                         <div class="comparison-section">
                             <h4>Changes from Original:</h4>
-                            <div v-for="(diff, field) in differences" :key="field" class="diff-row">
+                            <div v-for="(diff, field) in differences[entry.id] || {}" :key="field" class="diff-row">
                                 <strong>{{ field }}:</strong>
                                 <div class="diff-content">
                                     <div v-if="diff.unchanged" class="unchanged">
@@ -186,6 +186,13 @@ export default {
                     ...doc.data()
                 }));
 
+                // Load differences for entries with originalId
+                for (const entry of this.quizEntriesList) {
+                    if (entry.originalId) {
+                        this.differences[entry.id] = await this.getDifferences(entry);
+                    }
+                }
+
                 console.log('Loaded entries:', this.quizEntriesList.length);
             } catch (error) {
                 console.error('Error loading quiz entries:', error);
@@ -248,9 +255,11 @@ export default {
 
             const differences = {};
             const fieldsToCompare = [
-                'title', 'subtitle', 'Question', 'explanation',
+                'title', 'subtitle', 'Question', 'questionP2', 'explanation',
                 'option1', 'option2', 'option3', 'option4', 'option5',
-                'correctAnswer', 'explanation2'
+                'correctAnswer', 'explanation2', 'explanation3',
+                'closingText', 'closingText2', 'caution',
+                'videoUrl', 'videoId', 'imageUrl', 'imageAltText'
             ];
 
             for (const field of fieldsToCompare) {
