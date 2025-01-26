@@ -81,27 +81,16 @@
                     </div> -->
 
                     <template v-if="entry.originalId">
-                        <div class="comparison-header" v-if="hasDifferences(entry)">
+                        <div class="comparison-section">
                             <h4>Changes from Original:</h4>
-                        </div>
-
-                        <template
-                            v-for="(field, fieldName) in compareEntries(entry, getOriginalEntry(entry.originalId))"
-                            :key="fieldName">
-                            <div class="detail-row difference">
-                                <strong>{{ fieldName }}:</strong>
-                                <div class="diff-view">
-                                    <div class="original">
-                                        <span class="diff-label">Original:</span>
-                                        <span class="diff-content">{{ field.original || 'empty' }}</span>
-                                    </div>
-                                    <div class="draft">
-                                        <span class="diff-label">Draft:</span>
-                                        <span class="diff-content">{{ field.draft || 'empty' }}</span>
-                                    </div>
+                            <div v-for="(diff, field) in getDifferences(entry)" :key="field" class="diff-row">
+                                <strong>{{ field }}:</strong>
+                                <div class="diff-content">
+                                    <div class="original">Was: {{ diff.original || 'empty' }}</div>
+                                    <div class="current">Now: {{ diff.current || 'empty' }}</div>
                                 </div>
                             </div>
-                        </template>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -189,42 +178,41 @@ export default {
         hasOptions(entry) {
             return entry.option1 || entry.option2 || entry.option3 || entry.option4 || entry.option5;
         },
-        getOriginalEntry(originalId) {
-            return quizEntries.find(entry => entry.id === parseInt(originalId));
-        },
-        compareEntries(draft, original) {
-            if (!original || !draft) {
-                return {};
+        async loadOriginalEntry(originalId) {
+            try {
+                const docRef = doc(sorQuizzesDb, 'quizEntries', originalId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    return { id: docSnap.id, ...docSnap.data() };
+                }
+                return null;
+            } catch (error) {
+                console.error('Error loading original entry:', error);
+                return null;
             }
+        },
+        getDifferences(entry) {
+            const original = this.loadOriginalEntry(entry.originalId);
+            if (!original) return {};
 
             const differences = {};
             const fieldsToCompare = [
-                'title', 'subtitle', 'Question', 'questionP2',
-                'answer_type', 'option1', 'option2', 'option3',
-                'option4', 'option5', 'correctAnswer', 'explanation',
-                'explanation2', 'caution'
+                'title', 'subtitle', 'Question', 'explanation',
+                'option1', 'option2', 'option3', 'option4', 'option5',
+                'correctAnswer', 'explanation2'
             ];
 
-            fieldsToCompare.forEach(field => {
-                if (field in draft && field in original &&
-                    draft[field] !== original[field] &&
-                    (draft[field] || original[field])) {
+            for (const field of fieldsToCompare) {
+                if (entry[field] !== original[field]) {
                     differences[field] = {
-                        draft: draft[field],
-                        original: original[field]
+                        original: original[field],
+                        current: entry[field]
                     };
                 }
-            });
+            }
 
             return differences;
-        },
-        hasDifferences(entry) {
-            if (!entry?.originalId) return false;
-            const original = this.getOriginalEntry(entry.originalId);
-            if (!original) return false;
-
-            const differences = this.compareEntries(entry, original);
-            return Object.keys(differences).length > 0;
         },
         confirmDelete() {
             if (confirm(`Are you sure you want to delete ${this.selectedEntries.length} entries?`)) {
@@ -406,71 +394,27 @@ export default {
 }
 
 /* Comparison Section */
-.comparison-header {
+.comparison-section {
     margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    width: 100%;
-    text-align: left;
-}
-
-.comparison-header h4 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 1rem;
-}
-
-.difference {
-    background-color: var(--bg-secondary);
-    padding: 0.75rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
     border-radius: 4px;
+}
+
+.diff-row {
     margin: 0.5rem 0;
-    width: 100%;
-    text-align: left;
-}
-
-.diff-view {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    background-color: var(--bg-primary);
-    border-radius: 4px;
-    padding: 0.5rem;
-    width: 100%;
-}
-
-.original,
-.draft {
-    display: flex;
-    gap: 0.5rem;
-    align-items: baseline;
-    padding: 0.25rem;
-    text-align: left;
-}
-
-.diff-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    min-width: 70px;
-    font-weight: 500;
 }
 
 .diff-content {
-    flex: 1;
-    padding: 0.25rem;
-    border-radius: 2px;
+    margin-left: 1rem;
 }
 
-.original .diff-content {
-    color: #cf222e;
-    text-decoration: line-through;
-    background-color: rgba(255, 0, 0, 0.05);
+.original {
+    color: #dc3545;
 }
 
-.draft .diff-content {
-    color: #116329;
-    background-color: rgba(0, 255, 0, 0.05);
+.current {
+    color: #28a745;
 }
 
 /* Error State */
