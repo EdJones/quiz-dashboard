@@ -86,8 +86,14 @@
                             <div v-for="(diff, field) in getDifferences(entry)" :key="field" class="diff-row">
                                 <strong>{{ field }}:</strong>
                                 <div class="diff-content">
-                                    <div class="original">Was: {{ diff.original || 'empty' }}</div>
-                                    <div class="current">Now: {{ diff.current || 'empty' }}</div>
+                                    <div class="original">
+                                        <span class="diff-label">Original:</span>
+                                        <span class="diff-content">{{ diff.original || 'empty' }}</span>
+                                    </div>
+                                    <div class="current">
+                                        <span class="diff-label">Current:</span>
+                                        <span class="diff-content">{{ diff.current || 'empty' }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -397,24 +403,56 @@ export default {
 .comparison-section {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 4px;
+    background-color: var(--comparison-bg, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #ddd);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .diff-row {
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: var(--diff-row-bg, #ffffff);
+}
+
+.diff-row strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .diff-content {
     margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.original,
+.current {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
 }
 
 .original {
-    color: #dc3545;
+    background-color: var(--danger-bg-light, #fff5f5);
+    color: var(--danger-text, #dc3545);
 }
 
 .current {
-    color: #28a745;
+    background-color: var(--success-bg-light, #f0fff4);
+    color: var(--success-text, #28a745);
+}
+
+.diff-label {
+    font-weight: 500;
+    min-width: 70px;
+    font-size: 0.9rem;
 }
 
 /* Error State */
@@ -457,12 +495,16 @@ export default {
         font-size: 0.9rem;
     }
 
-    .diff-view {
-        font-size: 0.9rem;
+    .comparison-section {
+        padding: 0.75rem;
     }
 
-    .diff-label {
-        min-width: 60px;
+    .diff-row {
+        margin: 0.5rem 0;
+    }
+
+    .diff-content {
+        margin-left: 0.5rem;
     }
 
     .entry-checkbox {
