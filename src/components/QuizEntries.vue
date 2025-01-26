@@ -81,26 +81,33 @@
                     </div> -->
 
                     <template v-if="entry.originalId">
-                        <div class="comparison-section">
+                        <div v-if="entry.originalId" class="comparison-section">
                             <h4>Content and Changes:</h4>
                             <div v-for="(diff, field) in differences[entry.id] || {}" :key="field" class="diff-row">
-                                <strong>{{ field }}:</strong>
                                 <div class="diff-content">
                                     <!-- Only show comparison if there's a change -->
                                     <template v-if="!diff.unchanged">
-                                        <div class="original">
-                                            <span class="diff-label">Was:</span>
-                                            <span class="diff-content">{{ diff.original || 'empty' }}</span>
-                                        </div>
-                                        <div class="current">
-                                            <span class="diff-label">Now:</span>
-                                            <span class="diff-content">{{ diff.current || 'empty' }}</span>
+                                        <div class="field-row">
+                                            <strong class="field-label">{{ field }}:</strong>
+                                            <div class="diff-values">
+                                                <div class="original">
+                                                    <span class="diff-label">Was:</span>
+                                                    <span class="diff-content">{{ diff.original || 'empty' }}</span>
+                                                </div>
+                                                <div class="current">
+                                                    <span class="diff-label">Now:</span>
+                                                    <span class="diff-content">{{ diff.current || 'empty' }}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
                                     <!-- Always show current content -->
                                     <template v-else>
-                                        <div class="current-content">
-                                            {{ diff.current }}
+                                        <div class="field-row">
+                                            <strong class="field-label">{{ field }}:</strong>
+                                            <div class="current-content">
+                                                {{ diff.current }}
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -467,42 +474,42 @@ export default {
 
 /* Comparison Section */
 .comparison-section {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
     background-color: var(--comparison-bg, #f8f9fa);
     border-radius: 8px;
     border: 1px solid var(--border-color, #ddd);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .diff-row {
-    margin: 0.75rem 0;
-    padding: 0.5rem;
-    border-radius: 4px;
-    background-color: var(--diff-row-bg, #ffffff);
+    margin: 0.25rem 0;
+    padding: 0.25rem;
 }
 
-.diff-row strong {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary);
+.field-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.field-label {
+    min-width: 100px;
+    text-align: right;
+    padding-top: 0.15rem;
     font-size: 0.9rem;
 }
 
-.diff-content {
-    margin-left: 1rem;
+.diff-values {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    flex: 1;
 }
 
 .original,
 .current {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
 }
 
 .original {
@@ -516,14 +523,18 @@ export default {
 }
 
 .current-content {
-    padding: 0.25rem 0.5rem;
-    color: var(--text-primary);
+    padding: 0.15rem 0.5rem;
 }
 
 .diff-label {
     font-weight: 500;
-    min-width: 50px;
-    font-size: 0.9rem;
+    min-width: 45px;
+    font-size: 0.85rem;
+}
+
+h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
 }
 
 /* Error State */
