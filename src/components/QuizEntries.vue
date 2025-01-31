@@ -84,7 +84,8 @@
                         <div v-if="entry.originalId" class="comparison-section">
                             <h4>Content and Changes:</h4>
                             <div v-for="(diff, field) in differences[entry.id] || {}" :key="field" class="diff-row">
-                                <div class="diff-content">
+                                <!-- Only show if either original or current has content -->
+                                <div v-if="diff.original || diff.current" class="diff-content">
                                     <!-- Only show comparison if there's a change -->
                                     <template v-if="!diff.unchanged">
                                         <div class="field-row">
