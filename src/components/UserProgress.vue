@@ -101,7 +101,8 @@ export default {
                 'zaM4S3yvetUssR68ycGC2rM6mf23': 'Ed Laptop',
                 'I7eOVyCifVfll20Nyb5uZrXnYX22': 'Ed iPhone',
                 '2MF5B1lDM5U46QZkfcFXEdQtjK83': 'Ed iPhone',
-                'KmfQrAykhVdK17QbOxSM2RwZdeB3': 'localhost - ed'
+                'KmfQrAykhVdK17QbOxSM2RwZdeB3': 'localhost - ed',
+                'YcEgDO0BJQOVPuRZA9eMbvec4ty1': 'Ed Test'
             }
         }
     },
