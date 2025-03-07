@@ -348,6 +348,12 @@ export default {
                     const element = document.querySelector(`[data-entry-id="${id}"]`);
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth' });
+                        // Add highlight class
+                        element.classList.add('highlighted-entry');
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            element.classList.remove('highlighted-entry');
+                        }, 5000);
                     }
                 }
             }
@@ -381,6 +387,13 @@ export default {
     border-radius: 8px;
     background-color: var(--item-bg-color, #f9f9f9);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.highlighted-entry {
+    background-color: var(--highlight-bg, #fff3cd);
+    border-color: var(--highlight-border, #ffeeba);
+    box-shadow: 0 0 0 2px var(--highlight-border, #ffeeba);
 }
 
 .entry-item:hover {
