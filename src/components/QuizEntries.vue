@@ -41,6 +41,10 @@
                             <span class="metadata-label">By:</span>
                             <span>{{ entry.isAnonymous ? 'Anonymous' : entry.userEmail }}</span>
                         </div>
+                        <div v-if="entry.originalId" class="metadata-row edit-history">
+                            <span class="metadata-label">History:</span>
+                            <span>{{ editHistories[entry.id] || 'Loading...' }}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="entry-details">
@@ -148,6 +152,7 @@ export default {
             statusFilter: 'all',
             selectedEntries: [],
             differences: {},
+            editHistories: {},
         }
     },
     computed: {
@@ -197,10 +202,11 @@ export default {
                     ...doc.data()
                 }));
 
-                // Load differences for entries with originalId
+                // Load differences and histories for entries with originalId
                 for (const entry of this.quizEntriesList) {
                     if (entry.originalId) {
                         this.differences[entry.id] = await this.getDifferences(entry);
+                        this.editHistories[entry.id] = await this.getEditHistory(entry);
                     }
                 }
 
@@ -304,6 +310,31 @@ export default {
             } catch (error) {
                 this.error = error.message;
             }
+        },
+        async getEditHistory(entry) {
+            if (!entry.originalId) return '';
+
+            const history = [];
+            let currentEntry = entry;
+
+            while (currentEntry.originalId) {
+                const original = await this.loadOriginalEntry(currentEntry.originalId);
+                if (!original) break;
+
+                history.unshift({
+                    id: currentEntry.originalId,
+                    title: original.title || 'Untitled'
+                });
+
+                currentEntry = original;
+            }
+
+            if (history.length === 0) return '';
+
+            return history.map((item, index) => {
+                const isLast = index === history.length - 1;
+                return `#${item.id}${isLast ? '' : ' → '}`;
+            }).join('');
         }
     },
     async mounted() {
@@ -630,5 +661,11 @@ h4 {
 .delete-button:hover {
     background-color: var(--danger-text, #721c24);
     color: white;
+}
+
+.edit-history {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
 }
 </style>
