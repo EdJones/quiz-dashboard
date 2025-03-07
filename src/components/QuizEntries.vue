@@ -24,7 +24,7 @@
                             {{ entry.title }}
                             <span v-if="entry.originalId" class="edit-label">
                                 (Edit of <a href="#" class="history-link" :data-id="entry.originalId"
-                                    @click="handleHistoryClick">#{{ entry.originalId }}↗</a>)
+                                    @click="handleHistoryClick">#{{ entry.originalId }}•</a>)
                             </span>
                         </h4>
                         <span class="status-badge" :class="entry.status">{{ entry.status || 'pending' }}</span>
@@ -45,6 +45,10 @@
                         <div v-if="entry.originalId" class="metadata-row edit-history">
                             <span class="metadata-label">History:</span>
                             <span v-html="editHistories[entry.id] || 'Loading...'" @click="handleHistoryClick"></span>
+                        </div>
+                        <div v-if="childEntries[entry.id]?.length" class="metadata-row child-entries">
+                            <span class="metadata-label">Children:</span>
+                            <span v-html="getChildEntriesHtml(entry)" @click="handleHistoryClick"></span>
                         </div>
                     </div>
                 </div>
@@ -154,6 +158,7 @@ export default {
             selectedEntries: [],
             differences: {},
             editHistories: {},
+            childEntries: {}, // Track child entries for each entry
         }
     },
     computed: {
@@ -203,12 +208,14 @@ export default {
                     ...doc.data()
                 }));
 
-                // Load differences and histories for entries with originalId
+                // Load differences, histories, and child entries
                 for (const entry of this.quizEntriesList) {
                     if (entry.originalId) {
                         this.differences[entry.id] = await this.getDifferences(entry);
                         this.editHistories[entry.id] = await this.getEditHistory(entry);
                     }
+                    // Find child entries
+                    this.childEntries[entry.id] = this.quizEntriesList.filter(e => e.originalId === entry.id);
                 }
 
                 console.log('Loaded entries:', this.quizEntriesList.length);
@@ -334,7 +341,7 @@ export default {
 
             return history.map((item, index) => {
                 const isLast = index === history.length - 1;
-                return `<a href="#" class="history-link" data-id="${item.id}">#${item.id}↗</a>${isLast ? '' : ' → '}`;
+                return `<a href="#" class="history-link" data-id="${item.id}">#${item.id}•</a>${isLast ? '' : ' → '}`;
             }).join('');
         },
         handleHistoryClick(event) {
@@ -357,7 +364,14 @@ export default {
                     }
                 }
             }
-        }
+        },
+        getChildEntriesHtml(entry) {
+            if (!this.childEntries[entry.id]?.length) return '';
+
+            return this.childEntries[entry.id].map(child =>
+                `<a href="#" class="history-link" data-id="${child.id}">#${child.id}•</a>`
+            ).join(' → ');
+        },
     },
     async mounted() {
         if (this.entry?.originalId) {
@@ -709,5 +723,11 @@ h4 {
 
 .history-link:hover {
     text-decoration: underline;
+}
+
+.child-entries {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
 }
 </style>
