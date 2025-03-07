@@ -6,7 +6,8 @@
                 <option value="all">All Entries</option>
                 <option value="draft">Drafts</option>
                 <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
+                <option value="accepted">Accepted</option>
+                <option value="published">Published</option>
                 <option value="rejected">Rejected</option>
             </select>
             <button v-if="selectedEntries.length > 0 && showDeleteButton" class="button-75 delete-button"
@@ -27,7 +28,8 @@
                                     @click="handleHistoryClick">#{{ entry.originalId }}•</a>)
                             </span>
                         </h4>
-                        <span class="status-badge" :class="entry.status">{{ entry.status || 'pending' }}</span>
+                        <span class="status-badge" :class="entry.status">{{ entry.status === 'accepted' ? 'published' :
+                            entry.status || 'pending' }}</span>
                     </div>
                     <div class="entry-metadata">
                         <div class="metadata-row">
@@ -169,6 +171,8 @@ export default {
             if (this.statusFilter !== 'all') {
                 if (this.statusFilter === 'draft') {
                     filtered = filtered.filter(entry => !entry.status || entry.status === 'draft');
+                } else if (this.statusFilter === 'published') {
+                    filtered = filtered.filter(entry => entry.status === 'published' || entry.status === 'accepted');
                 } else {
                     filtered = filtered.filter(entry => entry.status === this.statusFilter);
                 }
@@ -360,7 +364,7 @@ export default {
                         // Remove highlight after 3 seconds
                         setTimeout(() => {
                             element.classList.remove('highlighted-entry');
-                        }, 5000);
+                        }, 7000);
                     }
                 }
             }
@@ -450,6 +454,13 @@ export default {
 .status-badge.rejected {
     background-color: var(--danger-bg, #f8d7da);
     color: var(--danger-text, #721c24);
+}
+
+.status-badge.published,
+.status-badge.accepted {
+    background-color: var(--success-bg, #d4edda);
+    color: var(--success-text, #155724);
+    border: 1px solid var(--success-border, #c3e6cb);
 }
 
 .entry-metadata {
