@@ -16,14 +16,15 @@
         </div>
 
         <div v-if="quizEntriesList.length" class="entries-list">
-            <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item">
+            <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item" :data-entry-id="entry.id">
                 <div class="entry-header">
                     <div class="entry-title">
                         <input type="checkbox" :value="entry.id" v-model="selectedEntries" class="entry-checkbox">
                         <h4>
                             {{ entry.title }}
                             <span v-if="entry.originalId" class="edit-label">
-                                (Edit of #{{ entry.originalId }})
+                                (Edit of <a href="#" class="history-link" :data-id="entry.originalId"
+                                    @click="handleHistoryClick">#{{ entry.originalId }}↗</a>)
                             </span>
                         </h4>
                         <span class="status-badge" :class="entry.status">{{ entry.status || 'pending' }}</span>
@@ -43,7 +44,7 @@
                         </div>
                         <div v-if="entry.originalId" class="metadata-row edit-history">
                             <span class="metadata-label">History:</span>
-                            <span>{{ editHistories[entry.id] || 'Loading...' }}</span>
+                            <span v-html="editHistories[entry.id] || 'Loading...'" @click="handleHistoryClick"></span>
                         </div>
                     </div>
                 </div>
@@ -333,8 +334,23 @@ export default {
 
             return history.map((item, index) => {
                 const isLast = index === history.length - 1;
-                return `#${item.id}${isLast ? '' : ' → '}`;
+                return `<a href="#" class="history-link" data-id="${item.id}">#${item.id}↗</a>${isLast ? '' : ' → '}`;
             }).join('');
+        },
+        handleHistoryClick(event) {
+            if (event.target.classList.contains('history-link')) {
+                event.preventDefault();
+                const id = event.target.dataset.id;
+                // Find the entry with this ID
+                const entry = this.quizEntriesList.find(e => e.id === id);
+                if (entry) {
+                    // Scroll to the entry
+                    const element = document.querySelector(`[data-entry-id="${id}"]`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }
         }
     },
     async mounted() {
@@ -667,5 +683,18 @@ h4 {
     font-size: 0.8rem;
     color: var(--text-secondary);
     font-style: italic;
+}
+
+.history-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.history-link:hover {
+    text-decoration: underline;
 }
 </style>
