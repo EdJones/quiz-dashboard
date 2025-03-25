@@ -1723,7 +1723,7 @@ export const quizEntries = [{
     closingText: "",
     closingText2: "",
     modal: "",
-    status: "pending",
+    status: "approved",
     userEmail: "ed.jones@gmail.com",
     isAnonymous: false,
     userId: "YcEgDO0BJQOVPuRZA9eMbvec4ty1",
@@ -1795,7 +1795,7 @@ export const quizEntries = [{
     closingText: "If you can help us add the research to this section, we'd be very appreciative.",
     closingText2: "",
     status: "draft",
-    id: "GZp2cdkYhuskL28ENRbb",
+    submitted_id: "GZp2cdkYhuskL28ENRbb",
     originalId: "K9G4hnDT4RyVxwE9c7T8"
 },
 {
