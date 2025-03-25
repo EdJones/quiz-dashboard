@@ -11,10 +11,13 @@
                 <option value="rejected">Rejected</option>
             </select>
             <button v-if="selectedEntries.length > 0 && showDeleteButton" class="button-75 delete-button"
-                @click="confirmDelete">
+                @click="showDeleteModal = true">
                 Delete Selected ({{ selectedEntries.length }})
             </button>
         </div>
+
+        <DeleteConfirmationModal :show="showDeleteModal" :entries="selectedEntriesData" @confirm="deleteSelectedEntries"
+            @cancel="showDeleteModal = false" />
 
         <div v-if="quizEntriesList.length" class="entries-list">
             <div v-for="entry in sortedEntries" :key="entry.id" class="entry-item" :data-entry-id="entry.id">
@@ -45,8 +48,25 @@
                             <span>{{ entry.isAnonymous ? 'Anonymous' : entry.userEmail }}</span>
                         </div>
                         <div v-if="entry.originalId" class="metadata-row edit-history">
-                            <span class="metadata-label">History:</span>
-                            <span v-html="editHistories[entry.id] || 'Loading...'" @click="handleHistoryClick"></span>
+                            <span class="metadata-label">Version History:</span>
+                            <div class="version-history-container">
+                                <div v-for="(version, index) in editHistories[entry.id]" :key="version.id"
+                                    class="version-item">
+                                    <div class="version-header">
+                                        <a href="#" class="history-link" :data-id="version.id"
+                                            @click="handleHistoryClick">
+                                            Version {{ index + 1 }}
+                                        </a>
+                                        <span class="version-meta">
+                                            {{ formatDate(version.timestamp) }}
+                                            <span v-if="version.userEmail" class="version-user">
+                                                by {{ version.isAnonymous ? 'Anonymous' : version.userEmail }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div v-if="version.title" class="version-title">{{ version.title }}</div>
+                                </div>
+                            </div>
                         </div>
                         <div v-if="childEntries[entry.id]?.length" class="metadata-row child-entries">
                             <span class="metadata-label">Children:</span>
@@ -144,9 +164,13 @@ import { sorQuizzesDb } from '../firebase';  // Import using the exported name
 import { quizEntries } from '../data/quiz-items';
 import { quizStore } from '../stores/quizStore';
 import { storeToRefs } from 'pinia';
+import DeleteConfirmationModal from './DeleteConfirmationModal.vue';
 
 export default {
     name: 'QuizEntries',
+    components: {
+        DeleteConfirmationModal
+    },
     setup() {
         const store = quizStore();
         const { deleteError } = storeToRefs(store);
@@ -160,7 +184,8 @@ export default {
             selectedEntries: [],
             differences: {},
             editHistories: {},
-            childEntries: {}, // Track child entries for each entry
+            childEntries: {},
+            showDeleteModal: false
         }
     },
     computed: {
@@ -186,6 +211,9 @@ export default {
         },
         showDeleteButton() {
             return this.store.canDeleteEntries();
+        },
+        selectedEntriesData() {
+            return this.quizEntriesList.filter(entry => this.selectedEntries.includes(entry.id));
         }
     },
     watch: {
@@ -318,13 +346,14 @@ export default {
             try {
                 await this.store.deleteQuizEntries(this.selectedEntries);
                 this.selectedEntries = [];
+                this.showDeleteModal = false;
                 await this.loadQuizEntries();
             } catch (error) {
                 this.error = error.message;
             }
         },
         async getEditHistory(entry) {
-            if (!entry.originalId) return '';
+            if (!entry.originalId) return [];
 
             const history = [];
             let currentEntry = entry;
@@ -335,18 +364,16 @@ export default {
 
                 history.unshift({
                     id: currentEntry.originalId,
-                    title: original.title || 'Untitled'
+                    title: original.title || 'Untitled',
+                    timestamp: original.timestamp,
+                    userEmail: original.userEmail,
+                    isAnonymous: original.isAnonymous
                 });
 
                 currentEntry = original;
             }
 
-            if (history.length === 0) return '';
-
-            return history.map((item, index) => {
-                const isLast = index === history.length - 1;
-                return `<a href="#" class="history-link" data-id="${item.id}">#${item.id}•</a>${isLast ? '' : ' → '}`;
-            }).join('');
+            return history;
         },
         handleHistoryClick(event) {
             if (event.target.classList.contains('history-link')) {
@@ -740,5 +767,56 @@ h4 {
     font-size: 0.8rem;
     color: var(--text-secondary);
     font-style: italic;
+}
+
+.version-history-container {
+    margin-top: 0.5rem;
+    border-left: 2px solid var(--border-color, #ddd);
+    padding-left: 1rem;
+}
+
+.version-item {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: var(--item-bg-color, #f9f9f9);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.version-item:hover {
+    background-color: var(--hover-bg-color, #f0f0f0);
+}
+
+.version-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.version-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.version-user {
+    margin-left: 0.5rem;
+    font-style: italic;
+}
+
+.version-title {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-top: 0.25rem;
+}
+
+.history-link {
+    color: var(--primary-color, #4a90e2);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.history-link:hover {
+    text-decoration: underline;
 }
 </style>
