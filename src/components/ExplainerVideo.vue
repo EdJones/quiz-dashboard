@@ -6,28 +6,28 @@
 </template>
 
 <script>
-import YouTubeEmbed from './YouTubeEmbed.vue'
+import YouTubeEmbed from "./YouTubeEmbed.vue";
 
 export default {
-  name: 'ExplainerVideo',
+  name: "ExplainerVideo",
   components: {
-    YouTubeEmbed
+    YouTubeEmbed,
   },
   props: {
     videoId: {
       type: String,
-      required: true
+      required: true,
     },
     caption: {
       type: String,
-      default: ''
+      default: "",
     },
     startTime: {
       type: Number,
-      default: 0
-    }
-  }
-}
+      default: 0,
+    },
+  },
+};
 </script>
 
 <style scoped>

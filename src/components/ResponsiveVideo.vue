@@ -1,25 +1,36 @@
 <template>
   <div class="video-container">
-    <iframe :src="youtubeEmbedUrl" frameborder="0" allowfullscreen
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    <iframe
+      :src="youtubeEmbedUrl"
+      frameborder="0"
+      allowfullscreen
+      allow="
+        accelerometer;
+        autoplay;
+        clipboard-write;
+        encrypted-media;
+        gyroscope;
+        picture-in-picture;
+      "
+    ></iframe>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ResponsiveVideo',
+  name: "ResponsiveVideo",
   props: {
     videoId: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     youtubeEmbedUrl() {
-      return `https://www.youtube.com/embed/${this.videoId}`
-    }
-  }
-}
+      return `https://www.youtube.com/embed/${this.videoId}`;
+    },
+  },
+};
 </script>
 
 <style scoped>

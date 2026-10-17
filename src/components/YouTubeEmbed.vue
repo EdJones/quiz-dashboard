@@ -1,46 +1,56 @@
 <template>
   <div class="youtube-embed">
     <div class="video-container">
-      <iframe :src="embedUrl" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>
+      <iframe
+        :src="embedUrl"
+        frameborder="0"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+        "
+        allowfullscreen
+      ></iframe>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'YouTubeEmbed',
+  name: "YouTubeEmbed",
   props: {
     videoId: {
       type: String,
-      required: true
+      required: true,
     },
     startTime: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   computed: {
     embedUrl() {
       return `https://www.youtube.com/embed/${this.videoId}?rel=0&showinfo=0&autoplay=0&start=${this.startTime}`;
-    }
+    },
   },
   methods: {
     onIframeLoad(event) {
-      console.log('Iframe loaded, dimensions:', {
+      console.log("Iframe loaded, dimensions:", {
         width: event.target.offsetWidth,
-        height: event.target.offsetHeight
+        height: event.target.offsetHeight,
       });
-    }
+    },
   },
   mounted() {
-    console.log('YouTube component mounted, videoId:', this.videoId);
+    console.log("YouTube component mounted, videoId:", this.videoId);
   },
   updated() {
-    console.log('YouTube component updated, videoId:', this.videoId);
-  }
-}
+    console.log("YouTube component updated, videoId:", this.videoId);
+  },
+};
 </script>
 
 <style scoped>
