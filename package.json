@@ -35,5 +35,14 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.1"
-  }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@firebase/util",
+      "esbuild",
+      "protobufjs",
+      "vue-demi"
+    ]
+  },
+  "packageManager": "pnpm@10.30.2"
 }
