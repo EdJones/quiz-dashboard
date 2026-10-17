@@ -3,13 +3,20 @@
     <font-awesome-icon :icon="['fas', 'flask-vial']" class="citation-icon" />
     <div class="citation-content">
       <p class="citation-text">
-        <span class="citation-title">{{ citation.title }}</span>, {{ citation.author }}, {{ citation.year }},
+        <span class="citation-title">{{ citation.title }}</span
+        >, {{ citation.author }}, {{ citation.year }},
         <a :href="citation.url" target="_blank" class="citation-link" :title="citation.url">
           {{ truncatedUrl }}
         </a>
       </p>
       <p v-if="citation.fullText" class="citation-text full-text">
-        <a :href="citation.fullText" target="_blank" class="citation-text-link" :title="citation.fullText">Full Text</a>
+        <a
+          :href="citation.fullText"
+          target="_blank"
+          class="citation-text-link"
+          :title="citation.fullText"
+          >Full Text</a
+        >
       </p>
     </div>
     <div v-if="citation.imageUrl" class="citation-image-wrapper">
@@ -20,22 +27,22 @@
 
 <script>
 export default {
-  name: 'Citation',
+  name: "Citation",
   props: {
     citation: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     truncatedUrl() {
       if (this.citation.url.length <= 55) {
         return this.citation.url;
       }
-      return this.citation.url.substring(0, 52) + '...';
-    }
-  }
-}
+      return this.citation.url.substring(0, 52) + "...";
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -80,7 +87,7 @@ export default {
 
 .citation-title {
   font-weight: bold;
-  font-size: .95rem;
+  font-size: 0.95rem;
   color: #614f4f;
 }
 

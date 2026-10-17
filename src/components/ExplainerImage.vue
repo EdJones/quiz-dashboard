@@ -1,7 +1,7 @@
 <template>
   <div class="explainer-image-wrapper">
     <figure>
-      <img :src="imageUrl" :alt="altText" class="explainer-image">
+      <img :src="imageUrl" :alt="altText" class="explainer-image" />
       <figcaption class="text-center text-muted text-xs">{{ altText }}</figcaption>
     </figure>
   </div>
@@ -9,21 +9,21 @@
 
 <script>
 export default {
-  name: 'ExplainerImage',
+  name: "ExplainerImage",
   props: {
     imageUrl: {
       type: String,
-      required: true
+      required: true,
     },
     altText: {
       type: String,
-      default: 'Explanation image'
-    }
+      default: "Explanation image",
+    },
   },
   mounted() {
-    console.log("In ExplainerImage, imageUrl is: ", this.imageUrl)
-  }
-}
+    console.log("In ExplainerImage, imageUrl is: ", this.imageUrl);
+  },
+};
 </script>
 
 <style scoped>

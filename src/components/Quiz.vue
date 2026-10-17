@@ -8,36 +8,47 @@
     </p>
   </div>
 
-  <div v-if="quizState === 'resultSummary'"
-    class="sm:w-full md:w-9/12 lg:w-5/6 px-2 quizzes-container text-center border-solid bodrder-stone-400">
+  <div
+    v-if="quizState === 'resultSummary'"
+    class="sm:w-full md:w-9/12 lg:w-5/6 px-2 quizzes-container text-center border-solid bodrder-stone-400"
+  >
     <h5 class="text-stone-400 pt-2"></h5>
     <p class="question-text mb-2">Results</p>
 
     <div class="grid quiz-item w-full border-4 place-self-center place-content-center text-center">
-      <p class="mt-20">You got </p>
-      <p class="text-3xl"> {{ numCorrect() }} of {{ this.quizItems.length }}</p>
+      <p class="mt-20">You got</p>
+      <p class="text-3xl">{{ numCorrect() }} of {{ this.quizItems.length }}</p>
       <p class="mb-20">correct.</p>
     </div>
   </div>
-  <div v-else-if="quizState === 'end'" class="sm:w-full md:w-9/12 lg:w-5/6 px-2 quizzes-container text-center">
+  <div
+    v-else-if="quizState === 'end'"
+    class="sm:w-full md:w-9/12 lg:w-5/6 px-2 quizzes-container text-center"
+  >
     <h5 class="text-stone-400 pt-2">&nbsp;</h5>
 
     <div class="grid quiz-item w-full border-4 place-self-center place-content-center text-center">
-      <p class="mt-20">You got </p>
-      <p class="text-3xl"> {{ numCorrect() }} of {{ this.quizItems.length }}</p>
+      <p class="mt-20">You got</p>
+      <p class="text-3xl">{{ numCorrect() }} of {{ this.quizItems.length }}</p>
       <p class="mb-20">correct.</p>
     </div>
   </div>
   <div v-else class="sm:w-full md:w-9/12 lg:w-5/6 lg:px-4 quizzes-container text-center">
     <div v-if="debug === true" class="debug-info">
-      <p>Quiz Debug (before QuizItem):
-        quizState: {{ quizState }},
-        reviewMode: {{ reviewMode }},
+      <p>
+        Quiz Debug (before QuizItem): quizState: {{ quizState }}, reviewMode: {{ reviewMode }},
         basicMode: {{ basicMode }}
       </p>
     </div>
-    <QuizItem :currentQuizItem="currentQuizItem" :itemNum="itemNum" :reviewMode="reviewMode" :basicMode="basicMode"
-      v-model:userAnswer="userAnswers[itemNum]" :debug="debug" @selected="chosen = true" />
+    <QuizItem
+      :currentQuizItem="currentQuizItem"
+      :itemNum="itemNum"
+      :reviewMode="reviewMode"
+      :basicMode="basicMode"
+      v-model:userAnswer="userAnswers[itemNum]"
+      :debug="debug"
+      @selected="chosen = true"
+    />
   </div>
 
   <!--div v-if="selectError === true">
@@ -46,45 +57,60 @@
 
   <!-- Debug info -->
   <div v-if="false">
-    <p>quizState: {{ quizState }}, itemNum: {{ itemNum }}, complete: {{ complete }}, chosen: {{ chosen }}, reviewMode:
-      {{ reviewMode }}</p>
+    <p>
+      quizState: {{ quizState }}, itemNum: {{ itemNum }}, complete: {{ complete }}, chosen:
+      {{ chosen }}, reviewMode: {{ reviewMode }}
+    </p>
   </div>
 
   <div v-if="quizState === 'basicAsk' && chosen">
-    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="checkIt">
-      'Check it' </button>
+    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="checkIt">'Check it'</button>
   </div>
   <div v-else-if="quizState === 'basicAsk' && !chosen">
-    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="selectionError">&nbsp; </button>
+    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="selectionError">
+      &nbsp;
+    </button>
   </div>
   <div v-else-if="quizState === 'expertAsk' && chosen && complete">
     <p v-if="!basicMode && chosen && complete && !reviewMode">No more questions...</p>
     <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="submit">Submit</button>
   </div>
   <div v-else-if="quizState === 'basicResults' && complete">
-    <button class="bg-stone-400 w-32 h-10 mt-3 mb-3 text-amber-400" @click="quizDone">quizDone</button>
+    <button class="bg-stone-400 w-32 h-10 mt-3 mb-3 text-amber-400" @click="quizDone">
+      quizDone
+    </button>
   </div>
   <div v-else-if="quizState === 'basicResults'">
-    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="nextQuestion">Next Question</button>
+    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="nextQuestion">
+      Next Question
+    </button>
   </div>
   <div v-else-if="quizState === 'expertAsk' && !chosen">
-    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="selectionError">&nbsp; </button>
+    <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="selectionError">
+      &nbsp;
+    </button>
   </div>
   <div v-else-if="quizState === 'expertAsk' && chosen">
     <button class="bg-stone-400 w-32 h-10 mt-6 text-amber-400" @click="nextItem">Next</button>
   </div>
   <div v-else-if="quizState === 'resultSummary'">
-    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="startReview">Let's see what's happening.</button>
+    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="startReview">
+      Let's see what's happening.
+    </button>
   </div>
   <div v-else-if="quizState === 'expertResults' && complete">
     <button class="bg-stone-400 w-32 h-10 mt-3 mb-3 text-amber-400" @click="quizDone">Next</button>
   </div>
   <div v-else-if="quizState === 'expertResults'">
-    <button class="bg-stone-400 w-32 h-10 mt-3 mb-3 text-amber-400" @click="nextReview">Next</button>
+    <button class="bg-stone-400 w-32 h-10 mt-3 mb-3 text-amber-400" @click="nextReview">
+      Next
+    </button>
   </div>
   <div v-else-if="quizState === 'end'" class="mt-6">
     <p>Thank you!</p>
-    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="showOriginalView">Return to Quizzes</button>
+    <button class="bg-stone-400 h-10 mt-6 text-amber-400" @click="showOriginalView">
+      Return to Quizzes
+    </button>
   </div>
   <div v-else>
     <p>Error: Unknown quiz state: {{ quizState }}</p>
@@ -92,28 +118,28 @@
   <span v-show="false">{{ reviewModeTracker }}</span>
 </template>
 <script>
-import QuizItem from './QuizItem.vue';
-import { quizEntries } from '../data/quiz-items.js'
-import { quizSets } from '../data/quizSets.js'
-import { quizStore } from '../stores/quizStore'; // Import the store
-import { ref, onMounted, watch } from 'vue'
-import { saveUserProgress } from '../firebase';
+import QuizItem from "./QuizItem.vue";
+import { quizEntries } from "../data/quiz-items.js";
+import { quizSets } from "../data/quizSets.js";
+import { quizStore } from "../stores/quizStore"; // Import the store
+import { ref, onMounted, watch } from "vue";
+import { saveUserProgress } from "../firebase";
 
 export default {
-  name: 'Quiz',
-  emits: ['change-view'],
+  name: "Quiz",
+  emits: ["change-view"],
   components: {
-    QuizItem
+    QuizItem,
   },
   props: {
     selectedQuiz: {
       type: Number,
-      required: true
+      required: true,
     },
     debug: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props) {
     const store = quizStore();
@@ -123,16 +149,15 @@ export default {
     });
 
     return {
-      store
-    }
+      store,
+    };
   },
   data() {
     console.log("Data item:");
     //console.log(quizItems[0]);
     const quizChoice = 1;
-    const quizState = 'chooseQuiz';
+    const quizState = "chooseQuiz";
     const reviewMode = false;
-
 
     return {
       quizItems: [],
@@ -144,8 +169,8 @@ export default {
       reviewMode: reviewMode,
       showEnd: false,
       selectError: false,
-      debug: this.debug
-    }
+      debug: this.debug,
+    };
   },
   computed: {
     currentQuizItem() {
@@ -161,46 +186,48 @@ export default {
       }
 
       // For expert mode, count the number of answered questions
-      return this.userAnswers.filter(answer => answer !== undefined).length;
+      return this.userAnswers.filter((answer) => answer !== undefined).length;
     },
     reviewModeTracker() {
-      return this.reviewMode;  // Explicitly track reviewMode
-    }
+      return this.reviewMode; // Explicitly track reviewMode
+    },
   },
   methods: {
     buildQuizSet() {
       // Set of 10-ish items
       console.log("Building quiz set");
-      console.log("quizSets: ", quizSets[this.selectedQuiz])
+      console.log("quizSets: ", quizSets[this.selectedQuiz]);
       let quizSetItems = [];
       for (let i = 0; i < quizSets[this.selectedQuiz].items.length; i++) {
-        console.log("In for loop", quizSets[this.selectedQuiz].items[i])
+        console.log("In for loop", quizSets[this.selectedQuiz].items[i]);
         quizSetItems[i] = quizEntries[quizSets[this.selectedQuiz].items[i]];
       }
       this.quizItems = quizSetItems;
       this.basicMode = quizSets[this.selectedQuiz].basicMode;
       if (this.basicMode) {
-        this.quizState = 'basicAsk';
+        this.quizState = "basicAsk";
       } else {
-        this.quizState = 'expertAsk';
+        this.quizState = "expertAsk";
       }
 
-      console.log("in buildQuizSet, this.basicMode: ", this.basicMode)
-      console.log("Returning quizItems: ", this.quizItems)
+      console.log("in buildQuizSet, this.basicMode: ", this.basicMode);
+      console.log("Returning quizItems: ", this.quizItems);
       // return quizItems;
     },
     numCorrect() {
       let correct = 0;
       console.log("Length ", this.quizItems.length);
       for (let i = 0; i < this.quizItems.length; i++) {
-        console.log(this.quizItems[i].correctAnswer)
+        console.log(this.quizItems[i].correctAnswer);
         console.log("this.$userAnswers[i]this.$userAnswers[i]", this.$userAnswers[i]);
         console.log("this.quizItems[i].correctAnswer: ", this.quizItems[i].correctAnswer);
-        if (this.$userAnswers[i] == this.quizItems[i].correctAnswer) { correct++ }
-        console.log("got one right")
+        if (this.$userAnswers[i] == this.quizItems[i].correctAnswer) {
+          correct++;
+        }
+        console.log("got one right");
       }
       console.log("--Finished numCorrect--");
-      return correct
+      return correct;
     },
     nextQuestion() {
       console.log("----In nextQuestion----");
@@ -208,15 +235,15 @@ export default {
         this.itemNum++;
         this.chosen = false;
         this.reviewMode = false;
-        this.quizState = 'basicAsk';
+        this.quizState = "basicAsk";
       } else {
         this.complete = true;
-        this.quizState = 'resultSummary';
+        this.quizState = "resultSummary";
       }
     },
     nextReview() {
       console.log("----In nextReview----");
-      this.quizState = 'expertResults';
+      this.quizState = "expertResults";
       console.log("Reviewing itemNum: ", this.itemNum, "quizItems.length: ", this.quizItems.length);
       if (this.itemNum < this.quizItems.length - 1) {
         this.itemNum++;
@@ -224,7 +251,7 @@ export default {
         this.complete = false;
       } else {
         this.complete = true;
-        this.quizState = 'end';
+        this.quizState = "end";
       }
     },
     async nextItem() {
@@ -237,12 +264,12 @@ export default {
         const questionId = currentQuestion.id;
         const questionTitle = currentQuestion.title;
 
-        console.log('Next Item Answer Check:', {
+        console.log("Next Item Answer Check:", {
           questionNumber: this.itemNum,
           questionId: questionId,
           questionTitle: questionTitle,
           selectedAnswer: selectedAnswer,
-          correctAnswer: correctAnswer
+          correctAnswer: correctAnswer,
         });
 
         // Save to store with correctness, ID, and title
@@ -252,7 +279,7 @@ export default {
           correctAnswer,
           questionId,
           questionTitle,
-          currentQuestion
+          currentQuestion,
         );
 
         // Save progress
@@ -260,9 +287,9 @@ export default {
           lastQuestionAnswered: this.itemNum,
           userAnswers: this.store.userAnswers,
           incorrectQuestions: this.store.incorrectQuestions,
-          totalCorrect: this.store.userAnswers.filter(a => a.correct).length,
+          totalCorrect: this.store.userAnswers.filter((a) => a.correct).length,
           totalAnswered: this.store.userAnswers.length,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         // Advance to next question
@@ -273,7 +300,7 @@ export default {
           // this.reviewMode = false;
         } else {
           this.complete = true;
-          this.quizState = 'resultSummary';
+          this.quizState = "resultSummary";
         }
       } catch (error) {
         console.error("Error in nextItem method:", error);
@@ -285,37 +312,40 @@ export default {
       try {
         const currentQuestion = this.quizItems[this.itemNum];
         if (!currentQuestion) {
-          console.error('No question found for index:', this.itemNum);
+          console.error("No question found for index:", this.itemNum);
           return;
         }
 
         // Debug log to see what we're dealing with
-        console.log('Question type:', {
+        console.log("Question type:", {
           type: currentQuestion.answer_type,
-          isSortable: currentQuestion.answer_type === 'sortableList'
+          isSortable: currentQuestion.answer_type === "sortableList",
         });
 
         let selectedAnswer;
         // Make sure we're checking the answer_type correctly
-        if (currentQuestion.answer_type === 'sortableList' || currentQuestion.answer_type === 'sortable') {
+        if (
+          currentQuestion.answer_type === "sortableList" ||
+          currentQuestion.answer_type === "sortable"
+        ) {
           // For sortable lists, just use the items array
           selectedAnswer = currentQuestion.items || [];
-          console.log('Using sortable items:', selectedAnswer);
+          console.log("Using sortable items:", selectedAnswer);
         } else {
           // Only for multiple choice
           selectedAnswer = this.userAnswers[this.itemNum];
           if (selectedAnswer === undefined) {
-            console.error('No valid answer for multiple choice question:', this.itemNum);
+            console.error("No valid answer for multiple choice question:", this.itemNum);
             return;
           }
         }
 
         const questionData = {
           selectedAnswer,
-          correctAnswer: currentQuestion.correctAnswer || '',
-          questionId: currentQuestion.id || '',
-          questionTitle: currentQuestion.title || '',
-          quizEntry: currentQuestion
+          correctAnswer: currentQuestion.correctAnswer || "",
+          questionId: currentQuestion.id || "",
+          questionTitle: currentQuestion.title || "",
+          quizEntry: currentQuestion,
         };
 
         await this.store.setUserAnswer(
@@ -324,32 +354,33 @@ export default {
           questionData.correctAnswer,
           questionData.questionId,
           questionData.questionTitle,
-          questionData.quizEntry
+          questionData.quizEntry,
         );
 
         await saveUserProgress(this.selectedQuiz, {
           lastQuestionAnswered: this.itemNum,
           userAnswers: this.store.userAnswers,
           incorrectQuestions: this.store.incorrectQuestions,
-          totalCorrect: this.store.userAnswers.filter(a => a.correct).length,
+          totalCorrect: this.store.userAnswers.filter((a) => a.correct).length,
           totalAnswered: this.store.userAnswers.length,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
-        this.quizState = 'basicResults';
+        this.quizState = "basicResults";
         this.reviewMode = true;
-        console.log("In checkIt, itemNum: ", this.itemNum, "quizItems.length: ", this.quizItems.length);
+        console.log(
+          "In checkIt, itemNum: ",
+          this.itemNum,
+          "quizItems.length: ",
+          this.quizItems.length,
+        );
         if (this.itemNum === this.quizItems.length - 1) {
           this.complete = true;
-
-
         } else {
           this.complete = false;
           // this.itemNum++;
-          this.chosen = false
-
+          this.chosen = false;
         }
-
       } catch (error) {
         console.error("Error in checkIt method:", error);
       }
@@ -362,9 +393,8 @@ export default {
     submit() {
       console.log("Complete. Let's see your score. ");
       this.showResults = true;
-      this.complete = false
+      this.complete = false;
       //this.quizState = 'resultSummary';
-
     },
     startReview() {
       console.log("----Start Review----", {
@@ -372,14 +402,14 @@ export default {
           quizState: this.quizState,
           itemNum: this.itemNum,
           reviewMode: this.reviewMode,
-          complete: this.complete
-        }
+          complete: this.complete,
+        },
       });
 
       // Force all state changes in the correct order
       this.itemNum = 0;
-      this.reviewMode = true;  // Set this before quizState
-      this.quizState = 'expertResults';
+      this.reviewMode = true; // Set this before quizState
+      this.quizState = "expertResults";
       this.complete = false;
 
       console.log("After startReview:", {
@@ -387,8 +417,8 @@ export default {
           quizState: this.quizState,
           itemNum: this.itemNum,
           reviewMode: this.reviewMode,
-          complete: this.complete
-        }
+          complete: this.complete,
+        },
       });
     },
     selectionError() {
@@ -399,7 +429,7 @@ export default {
       console.log("Before quizDone:", {
         currentState: this.quizState,
         complete: this.complete,
-        reviewMode: this.reviewMode
+        reviewMode: this.reviewMode,
       });
 
       // Force exit from review mode
@@ -408,17 +438,17 @@ export default {
       this.chosen = false;
       // Set final states
       this.complete = true;
-      this.quizState = 'end';
+      this.quizState = "end";
 
       console.log("After quizDone:", {
         currentState: this.quizState,
         complete: this.complete,
-        reviewMode: this.reviewMode
+        reviewMode: this.reviewMode,
       });
     },
     showOriginalView() {
-      this.$emit('change-view', { showQuizzes: true }); // Emit an event with the new state
-    }
+      this.$emit("change-view", { showQuizzes: true }); // Emit an event with the new state
+    },
   },
   created() {
     this.buildQuizSet();
@@ -428,23 +458,23 @@ export default {
     quizState: {
       immediate: true,
       handler(newState) {
-        console.log('quizState watcher:', {
+        console.log("quizState watcher:", {
           newState,
-          isExpertResults: newState === 'expertResults',
-          isBasicResults: newState === 'basicResults',
-          shouldBeReviewMode: newState === 'expertResults' || newState === 'basicResults'
+          isExpertResults: newState === "expertResults",
+          isBasicResults: newState === "basicResults",
+          shouldBeReviewMode: newState === "expertResults" || newState === "basicResults",
         });
 
-        this.reviewMode = newState === 'expertResults' || newState === 'basicResults';
+        this.reviewMode = newState === "expertResults" || newState === "basicResults";
 
-        console.log('After setting reviewMode:', {
+        console.log("After setting reviewMode:", {
           reviewMode: this.reviewMode,
-          quizState: this.quizState
+          quizState: this.quizState,
         });
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 </script>
 
 <style>
@@ -474,6 +504,5 @@ export default {
   border-style: solid;
   border-top-right-radius: 2dvw;
   border-radius: 2dvw;
-
 }
 </style>

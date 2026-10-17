@@ -1,5 +1,5 @@
 <template>
-  <div v-if="debug === true" style="padding: 5px; margin: 5px;">
+  <div v-if="debug === true" style="padding: 5px; margin: 5px">
     <p>QuizItem Debug:</p>
     <ul>
       <li>reviewMode: {{ reviewMode }}</li>
@@ -12,8 +12,13 @@
     <h2 class="text-xl font-bold mb-4">{{ quizItem.subtitle }}</h2>
     <!-- Existing question types -->
     <div v-if="quizItem.answer_type == 'mc'">
-      <MultipleChoice @answer-selected="handleAnswerSelected" :quizItem="quizItem" :reviewMode="reviewMode"
-        :itemNum="itemNum" :basicMode="basicMode" />
+      <MultipleChoice
+        @answer-selected="handleAnswerSelected"
+        :quizItem="quizItem"
+        :reviewMode="reviewMode"
+        :itemNum="itemNum"
+        :basicMode="basicMode"
+      />
     </div>
 
     <div v-else-if="quizItem.answer_type == 'true_false'">
@@ -26,69 +31,81 @@
 
     <!-- Sortable list -->
     <div v-else-if="quizItem.answer_type == 'sortable'">
-      <SortableList :title="quizItem.title" :instructions="quizItem.instructions" :items="quizItem.items"
-        :correctOrder="quizItem.correctOrder" :disabled="reviewMode" :topLabel="quizItem.topLabel"
-        :bottomLabel="quizItem.bottomLabel" @order-changed="handleOrderChanged" />
+      <SortableList
+        :title="quizItem.title"
+        :instructions="quizItem.instructions"
+        :items="quizItem.items"
+        :correctOrder="quizItem.correctOrder"
+        :disabled="reviewMode"
+        :topLabel="quizItem.topLabel"
+        :bottomLabel="quizItem.bottomLabel"
+        @order-changed="handleOrderChanged"
+      />
     </div>
     <!-- Debug the Explanation rendering condition -->
     <div v-if="debug === true">
       <p>Should show Explanation: {{ reviewMode && !basicMode }}</p>
     </div>
-    <Explanation :quizItem="quizItem" :reviewMode="reviewMode" :userAnswer="userAnswer" ref="explanationComponent" />
+    <Explanation
+      :quizItem="quizItem"
+      :reviewMode="reviewMode"
+      :userAnswer="userAnswer"
+      ref="explanationComponent"
+    />
     <!-- Debug output -->
     <!--div class="debug-info">
       <p>Review Mode in QuizItem: {{ reviewMode }}</p>
     </div> -->
   </div>
-  <div v-else class="error-message">
-    Error loading quiz item
-  </div>
+  <div v-else class="error-message">Error loading quiz item</div>
 </template>
 
 <script>
-import MultipleChoice from './MultipleChoice.vue';
-import LiteYouTubeEmbed from 'vue-lite-youtube-embed';
-import Explanation from './Explanation.vue'; // Add this import
-import SortableList from './SortableList.vue';
-import { ref } from 'vue';
+import MultipleChoice from "./MultipleChoice.vue";
+import LiteYouTubeEmbed from "vue-lite-youtube-embed";
+import Explanation from "./Explanation.vue"; // Add this import
+import SortableList from "./SortableList.vue";
+import { ref } from "vue";
 
 export default {
-  name: 'QuizItem',
+  name: "QuizItem",
   props: {
     currentQuizItem: {
       type: Object,
       required: true,
       validator(value) {
         // Add basic validation
-        const required = ['title', 'Question', 'answer_type'];
-        const valid = required.every(prop => value.hasOwnProperty(prop));
+        const required = ["title", "Question", "answer_type"];
+        const valid = required.every((prop) => value.hasOwnProperty(prop));
         if (!valid) {
-          console.warn('QuizItem missing required properties:',
-            required.filter(prop => !value.hasOwnProperty(prop)));
+          console.warn(
+            "QuizItem missing required properties:",
+            required.filter((prop) => !value.hasOwnProperty(prop)),
+          );
         }
         return valid;
-      }
+      },
     },
     itemNum: {
       type: Number,
-      required: true
+      required: true,
     },
     reviewMode: {
       type: Boolean,
-      required: true
+      required: true,
     },
     basicMode: {
       type: Boolean,
-      required: true
+      required: true,
     },
     userAnswer: {
       type: [String, Number, Array],
-      default: null
+      default: null,
     },
     debug: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   components: {
     MultipleChoice,
@@ -99,38 +116,42 @@ export default {
   computed: {
     quizItem() {
       if (!this.currentQuizItem) {
-        console.error('No quiz item provided');
+        console.error("No quiz item provided");
         return {};
       }
       return this.currentQuizItem;
-    }
+    },
   },
   watch: {
-
     itemNum(newItemNum, oldItemNum) {
       console.log("In itemNumwatcher itemNum, item changed from", oldItemNum, " to ", newItemNum);
-      console.log("In itemNum watcher itemNum, reviewmode is: ", this.reviewMode)
-      console.log("In itemNum  Watcher, basicMode is: ", this.basicMode, "and reviewMode is: ", this.reviewMode)
-      if (this.basicMode == false)
-        console.log("In itemNum watcher, quizItem is: ", this.quizItem);
+      console.log("In itemNum watcher itemNum, reviewmode is: ", this.reviewMode);
+      console.log(
+        "In itemNum  Watcher, basicMode is: ",
+        this.basicMode,
+        "and reviewMode is: ",
+        this.reviewMode,
+      );
+      if (this.basicMode == false) console.log("In itemNum watcher, quizItem is: ", this.quizItem);
       console.log("Exit itemNum itemNum watcher");
     },
     quizItem: {
       handler(newVal) {
         console.log("Updated quizItem:", newVal); // Should log the new quizItem
       },
-      immediate: true // Trigger on component mount
+      immediate: true, // Trigger on component mount
     },
     reviewMode(oldStatus, newStatus) {
       console.log("reviewMode changed from ", oldStatus, " to ", newStatus);
       if (this.reviewMode) {
         console.log("in reviewMode watcher, this.$userAnswers", this.$userAnswers);
         console.log("in reviewMode  watcher, this.itemNum", this.itemNum);
-        console.log("in reviewMode  watcher, this.$userAnswers[this.itemNum]", this.$userAnswers[this.itemNum]);
-
-
+        console.log(
+          "in reviewMode  watcher, this.$userAnswers[this.itemNum]",
+          this.$userAnswers[this.itemNum],
+        );
       }
-    }
+    },
   },
   data() {
     console.log("In QuizItem data, itemNum is: ", this.itemNum);
@@ -138,28 +159,27 @@ export default {
     //console.log("In QuizItem data, quizItems is: ", quizItems);
     return {
       //currentQuizItem: this.quizItems[this.itemNum]
-    }
+    };
   },
   mounted() {
-    console.log('QuizItem mounted, currentQuizItem:', this.currentQuizItem);
+    console.log("QuizItem mounted, currentQuizItem:", this.currentQuizItem);
   },
 
   methods: {
-
     onHover() {
       console.log("Hovered");
     },
     handleOrderChanged(newOrder) {
       this.userAnswer = newOrder;
-      this.$emit('selected');
+      this.$emit("selected");
       this.explanationComponent.checkAnswer();
     },
     handleAnswerSelected(selectedOption) {
       console.log("Answer selected in QuizItem:", selectedOption);
       this.userAnswer = selectedOption;
-      this.$emit('update:userAnswer', selectedOption);
-      this.$emit('selected');
-    }
+      this.$emit("update:userAnswer", selectedOption);
+      this.$emit("selected");
+    },
   },
   setup(props, { emit }) {
     const userAnswer = ref(null);
@@ -167,7 +187,7 @@ export default {
 
     const handleOrderChanged = (newOrder) => {
       userAnswer.value = newOrder;
-      emit('selected');
+      emit("selected");
       explanationComponent.value.checkAnswer();
     };
 
@@ -178,8 +198,8 @@ export default {
       // quizItem: props.quizItem,
     };
   },
-  emits: ['update:userAnswer', 'selected'],
-}
+  emits: ["update:userAnswer", "selected"],
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -192,7 +212,6 @@ ul {
   list-style-type: none;
 }
 
-
 a {
   color: #42b983;
 }
@@ -201,7 +220,6 @@ a {
   border-style: solid;
   border-top-right-radius: 2dvw;
   border-radius: 2dvw;
-
 }
 
 .question-text {
@@ -218,9 +236,7 @@ a {
   text-align: left;
 }
 
-
 .list-asking {
-
   margin-top: auto;
   margin-bottom: auto;
   margin-right: 10px;
@@ -233,7 +249,6 @@ a {
   color: aqua;
   height: 25px;
   width: 25px;
-  ;
 }
 
 .list-item-right {
@@ -271,7 +286,7 @@ a {
 .caution-icon {
   height: 20;
   width: 20;
-  color: #FFBF00;
+  color: #ffbf00;
 }
 
 .caution-message {
